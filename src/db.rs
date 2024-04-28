@@ -2,17 +2,20 @@ use anyhow::{Context, Result};
 use diesel::prelude::*;
 use diesel::r2d2::{ConnectionManager, Pool, PooledConnection};
 
+#[cfg(feature = "sqlite")]
+use diesel::prelude::SqliteConnection as DbConnection;
+
 use crate::models::db::User;
 
 pub struct DB {
-    conn: Pool<ConnectionManager<SqliteConnection>>,
+    conn: Pool<ConnectionManager<DbConnection>>,
 }
 
 impl DB {
     pub fn new(db_url: &str) -> Result<Self> {
         let pool = Pool::builder()
             .max_size(16)
-            .build(ConnectionManager::<SqliteConnection>::new(db_url))?;
+            .build(ConnectionManager::<DbConnection>::new(db_url))?;
         Ok(Self { conn: pool })
     }
     pub fn get_user(&self, email: &str) -> Result<Option<User>> {
@@ -46,7 +49,7 @@ impl DB {
 
         self.get_user(email).map(|u| u.unwrap())
     }
-    fn pool(&self) -> Result<PooledConnection<ConnectionManager<SqliteConnection>>> {
+    fn pool(&self) -> Result<PooledConnection<ConnectionManager<DbConnection>>> {
         self.conn.get().context("cannot get db.pool")
     }
 }
