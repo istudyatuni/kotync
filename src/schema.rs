@@ -93,11 +93,5 @@ diesel::joinable!(manga_tags -> manga (manga_id));
 diesel::joinable!(manga_tags -> tags (tag_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
-    categories,
-    favourites,
-    history,
-    manga,
-    manga_tags,
-    tags,
-    users,
+    categories, favourites, history, manga, manga_tags, tags, users,
 );

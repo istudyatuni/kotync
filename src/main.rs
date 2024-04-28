@@ -10,7 +10,10 @@ use simplelog::{ColorChoice, ConfigBuilder, TermLogger, TerminalMode};
 
 mod config;
 mod db;
+mod jwt;
 mod models;
+mod request;
+mod response;
 mod routes;
 mod schema;
 
@@ -26,7 +29,9 @@ async fn main() -> Result<()> {
     let db = DB::new(&config.db.url)?;
 
     let _rocket = rocket::build()
-        .mount("/", routes![routes::root])
+        .manage(config)
+        .manage(db)
+        .mount("/", routes![routes::root, routes::auth])
         .launch()
         .await?;
 

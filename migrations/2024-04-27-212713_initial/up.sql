@@ -41,10 +41,9 @@ create index tag_id
 
 create table users
 (
-    id                        int auto_increment
-        primary key,
+    id                        integer primary key autoincrement,
     email                     varchar(120) not null,
-    password                  char(32) not null,
+    password                  char(64) not null,
     nickname                  varchar(84) null,
     favourites_sync_timestamp bigint   null,
     history_sync_timestamp    bigint   null

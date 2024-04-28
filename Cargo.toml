@@ -5,8 +5,9 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.82"
+blake3 = "1.5.1"
 confique = { version = "0.2.5", default-features = false, features = ["toml"] }
-diesel = { version = "2.1.6", features = ["sqlite"] }
+diesel = { version = "2.1.6", features = ["sqlite", "r2d2"] }
 dotenvy = "0.15.7"
 jsonwebtoken = "9.3.0"
 log = { version = "0.4.21", features = ["kv"] }
