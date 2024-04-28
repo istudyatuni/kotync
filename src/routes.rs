@@ -1,7 +1,7 @@
 use anyhow::Result;
 use rocket::{get, http::Status, post, serde::json::Json, State};
 
-use crate::{config::Conf, db::DB, jwt, request, response};
+use crate::{config::Conf, db::DB, jwt, models::request, models::response};
 
 #[get("/")]
 pub fn root() -> &'static str {

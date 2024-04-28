@@ -1,19 +1,18 @@
 use std::path::PathBuf;
 
 use anyhow::{Context, Result};
-use config::Conf;
 use confique::Config;
-use db::DB;
 use log::LevelFilter;
 use rocket::routes;
 use simplelog::{ColorChoice, ConfigBuilder, TermLogger, TerminalMode};
+
+use config::Conf;
+use db::DB;
 
 mod config;
 mod db;
 mod jwt;
 mod models;
-mod request;
-mod response;
 mod routes;
 mod schema;
 
