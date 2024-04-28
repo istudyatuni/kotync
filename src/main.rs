@@ -1,6 +1,6 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, sync::OnceLock};
 
-use anyhow::{Context, Result};
+use anyhow::{anyhow, Context, Result};
 use confique::Config;
 use log::LevelFilter;
 use rocket::routes;
@@ -13,8 +13,19 @@ mod config;
 mod db;
 mod jwt;
 mod models;
+mod request;
 mod routes;
+
+#[rustfmt::skip]
 mod schema;
+
+static SECRET: OnceLock<Conf> = OnceLock::new();
+
+fn get_config() -> Result<&'static Conf> {
+    crate::SECRET
+        .get()
+        .ok_or(anyhow!("failed to get config from static"))
+}
 
 #[rocket::main]
 async fn main() -> Result<()> {
@@ -22,15 +33,18 @@ async fn main() -> Result<()> {
     dotenv()?;
 
     let config = Conf::builder().env().file("config.toml").load()?;
-
     log::info!("loaded config: {config:#?}");
 
     let db = DB::new(&config.db.url)?;
 
+    SECRET
+        .set(config.clone())
+        .map_err(|_| anyhow!("failed to save jwt.secret to static"))?;
+
     let _rocket = rocket::build()
         .manage(config)
         .manage(db)
-        .mount("/", routes![routes::root, routes::auth])
+        .mount("/", routes![routes::root, routes::auth, routes::me])
         .launch()
         .await?;
 

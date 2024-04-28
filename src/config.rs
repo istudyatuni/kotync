@@ -1,4 +1,4 @@
-#[derive(Debug, confique::Config)]
+#[derive(Debug, Clone, confique::Config)]
 pub struct Conf {
     #[config(nested)]
     pub db: ConfDB,
@@ -8,7 +8,7 @@ pub struct Conf {
     pub allow_new_register: bool,
 }
 
-#[derive(Debug, confique::Config)]
+#[derive(Debug, Clone, confique::Config)]
 pub struct ConfJWT {
     #[config(env = "JWT_SECRET", default = "")]
     pub secret: String,
@@ -18,7 +18,7 @@ pub struct ConfJWT {
     pub audience: String,
 }
 
-#[derive(Debug, confique::Config)]
+#[derive(Debug, Clone, confique::Config)]
 pub struct ConfDB {
     #[config(env = "DATABASE_URL", default = "data.db")]
     pub url: String,

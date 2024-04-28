@@ -24,6 +24,15 @@ impl DB {
             .first(&mut self.pool()?)
             .optional()?)
     }
+    pub fn get_user_by_id(&self, user_id: i32) -> Result<Option<User>> {
+        use crate::schema::users::dsl::users;
+
+        Ok(users
+            .find(user_id)
+            .select(User::as_select())
+            .first(&mut self.pool()?)
+            .optional()?)
+    }
     pub fn create_user(&self, email: &str, password: &str) -> Result<User> {
         use crate::schema::users::dsl::users;
 
