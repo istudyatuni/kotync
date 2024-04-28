@@ -1,0 +1,9 @@
+allow_new_register = true
+
+[db]
+url = "data.db"
+
+[jwt]
+secret = ""
+issuer = "http://0.0.0.0:8080/"
+audience = "http://0.0.0.0:8080/resource"

@@ -1,0 +1,15 @@
+[package]
+name = "kotync"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.82"
+confique = { version = "0.2.5", default-features = false, features = ["toml"] }
+diesel = { version = "2.1.6", features = ["sqlite"] }
+dotenvy = "0.15.7"
+jsonwebtoken = "9.3.0"
+log = { version = "0.4.21", features = ["kv"] }
+rocket = { version = "0.5.0", features = ["json"] }
+serde = { version = "1.0.199", features = ["derive"] }
+simplelog = "0.12.2"
