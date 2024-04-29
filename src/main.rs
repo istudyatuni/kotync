@@ -1,4 +1,4 @@
-use std::{path::PathBuf, sync::OnceLock};
+use std::{path::PathBuf, str::FromStr, sync::OnceLock};
 
 use anyhow::{anyhow, Context, Result};
 use confique::Config;
@@ -36,7 +36,7 @@ async fn main() -> Result<()> {
     dotenv()?;
 
     let config = Conf::builder().env().file("config.toml").load()?;
-    log::info!("loaded config: {config:#?}");
+    log::info!("loaded config\n{config}");
     rocket(config)?.launch().await?;
 
     Ok(())
@@ -72,8 +72,23 @@ fn dotenv() -> Result<()> {
 }
 
 fn init_logger() -> Result<()> {
+    #[cfg(not(debug_assertions))]
+    const DEFAULT: LevelFilter = LevelFilter::Error;
+    #[cfg(debug_assertions)]
+    const DEFAULT: LevelFilter = LevelFilter::Info;
+
+    let level: LevelFilter = std::env::var("RUST_LOG")
+        .map(|s| {
+            LevelFilter::from_str(&s)
+                .inspect_err(|_| eprintln!("invalid RUST_LOG"))
+                .unwrap_or(DEFAULT)
+        })
+        .unwrap_or(DEFAULT);
+
+    eprintln!("set log level {level}");
+
     TermLogger::init(
-        LevelFilter::Info,
+        level,
         ConfigBuilder::new().set_time_format_rfc3339().build(),
         TerminalMode::Stderr,
         ColorChoice::Auto,
