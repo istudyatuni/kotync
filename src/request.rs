@@ -11,9 +11,11 @@ pub struct ApiToken {
     pub user_id: i32,
 }
 
-#[derive(Debug)]
+#[derive(Debug, thiserror::Error)]
 pub enum AuthError {
+    #[error("authorization missing")]
     MissingAuthorization,
+    #[error("invalid token")]
     InvalidToken,
 }
 
