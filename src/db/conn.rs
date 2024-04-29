@@ -25,7 +25,7 @@ impl DB {
         Ok(Self { conn: pool })
     }
     pub fn get_user(&self, email: &str) -> Result<Option<User>> {
-        use crate::schema::users::dsl::{email as user_email, users};
+        use crate::db::schema::users::dsl::{email as user_email, users};
 
         Ok(users
             .filter(user_email.eq(email))
@@ -34,7 +34,7 @@ impl DB {
             .optional()?)
     }
     pub fn get_user_by_id(&self, user_id: i32) -> Result<Option<User>> {
-        use crate::schema::users::dsl::users;
+        use crate::db::schema::users::dsl::users;
 
         Ok(users
             .find(user_id)
@@ -43,7 +43,7 @@ impl DB {
             .optional()?)
     }
     pub fn create_user(&self, email: &str, password: &str) -> Result<User> {
-        use crate::schema::users::dsl::users;
+        use crate::db::schema::users::dsl::users;
 
         diesel::insert_into(users)
             .values(User {

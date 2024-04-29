@@ -3,7 +3,7 @@ use rocket::{get, http::Status, post, serde::json::Json, State};
 
 use crate::{
     config::Conf,
-    db::DB,
+    db::conn::DB,
     jwt,
     models::request,
     models::response,

@@ -3,7 +3,7 @@ use serde::Serialize;
 
 #[derive(Queryable, Selectable, Insertable, Serialize, Debug)]
 #[diesel(
-	table_name = crate::schema::categories,
+	table_name = crate::db::schema::categories,
 	check_for_backend(diesel::sqlite::Sqlite)
 )]
 pub struct Category {
@@ -20,7 +20,7 @@ pub struct Category {
 
 #[derive(Queryable, Selectable, Insertable, Serialize, Debug)]
 #[diesel(
-	table_name = crate::schema::favourites,
+	table_name = crate::db::schema::favourites,
 	check_for_backend(diesel::sqlite::Sqlite)
 )]
 pub struct Favourite {
@@ -34,7 +34,7 @@ pub struct Favourite {
 
 #[derive(Queryable, Selectable, Insertable, Serialize, Debug)]
 #[diesel(
-	table_name = crate::schema::history,
+	table_name = crate::db::schema::history,
 	check_for_backend(diesel::sqlite::Sqlite)
 )]
 pub struct HistoryEntry {
@@ -52,7 +52,7 @@ pub struct HistoryEntry {
 
 #[derive(Queryable, Selectable, Insertable, Serialize, Debug)]
 #[diesel(
-	table_name = crate::schema::manga,
+	table_name = crate::db::schema::manga,
 	check_for_backend(diesel::sqlite::Sqlite)
 )]
 pub struct Manga {
@@ -72,7 +72,7 @@ pub struct Manga {
 
 #[derive(Queryable, Selectable, Insertable, Serialize, Debug)]
 #[diesel(
-	table_name = crate::schema::tags,
+	table_name = crate::db::schema::tags,
 	check_for_backend(diesel::sqlite::Sqlite)
 )]
 pub struct Tag {
@@ -84,7 +84,7 @@ pub struct Tag {
 
 #[derive(Queryable, Selectable, Insertable, Serialize, Debug, Default)]
 #[diesel(
-	table_name = crate::schema::users,
+	table_name = crate::db::schema::users,
 	check_for_backend(diesel::sqlite::Sqlite)
 )]
 pub struct User {

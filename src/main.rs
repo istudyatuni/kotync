@@ -7,7 +7,7 @@ use rocket::{routes, Build, Rocket};
 use simplelog::{ColorChoice, ConfigBuilder, TermLogger, TerminalMode};
 
 use config::Conf;
-use db::DB;
+use db::conn::DB;
 
 mod config;
 mod db;
@@ -15,9 +15,6 @@ mod jwt;
 mod models;
 mod request;
 mod routes;
-
-#[rustfmt::skip]
-mod schema;
 
 #[cfg(test)]
 mod tests;
