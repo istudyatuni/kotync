@@ -51,7 +51,11 @@ fn rocket(config: Conf) -> Result<Rocket<Build>> {
     let rocket = rocket::build()
         .manage(config)
         .manage(db)
-        .mount("/", routes![routes::root, routes::auth, routes::me]);
+        .mount(
+            "/",
+            routes![routes::base::root, routes::base::auth, routes::base::me],
+        )
+        .mount("/resource", routes![routes::resource::save_favourites]);
     Ok(rocket)
 }
 

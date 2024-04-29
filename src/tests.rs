@@ -29,7 +29,7 @@ fn prepare_client(id: usize) -> Result<Client> {
 #[test]
 fn test_root() -> Result<()> {
     let client = prepare_client(1)?;
-    let resp = client.get(uri!(routes::root)).dispatch();
+    let resp = client.get(uri!(routes::base::root)).dispatch();
 
     assert_eq!(resp.status(), Status::Ok);
     assert_eq!(resp.into_string().unwrap(), "Alive");
@@ -43,7 +43,7 @@ fn test_auth() -> Result<()> {
     let email = "test@example.com";
 
     let resp = client
-        .post(uri!(routes::auth))
+        .post(uri!(routes::base::auth))
         .json(&request::Auth {
             email: email.to_string(),
             password: "test".to_string(),
@@ -55,7 +55,7 @@ fn test_auth() -> Result<()> {
     let token = format!("Bearer {}", resp.token);
 
     let resp = client
-        .get(uri!(routes::me))
+        .get(uri!(routes::base::me))
         .header(Header::new("Authorization", token))
         .dispatch();
     assert_eq!(resp.status(), Status::Ok);
