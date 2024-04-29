@@ -2,8 +2,6 @@
 @default:
 	just --list
 
-# prune and setup db
+# prune db
 remake-db:
 	rm data.db
-	diesel setup
-	diesel migration run

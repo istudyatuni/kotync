@@ -19,7 +19,7 @@ pub fn auth(
     log::debug!("getting user");
     let user = db.get_user(&req.email).map_err(|e| {
         log::error!("failed to get user: {e}");
-        (Status::InternalServerError, None)
+        (Status::InternalServerError, Some(""))
     })?;
     let user = match user {
         Some(u) => u,
@@ -33,7 +33,7 @@ pub fn auth(
             log::debug!("creating user");
             db.create_user(&req.email, &req.password).map_err(|e| {
                 log::error!("failed to save user: {e}");
-                (Status::InternalServerError, None)
+                (Status::InternalServerError, Some(""))
             })?
         }
     };

@@ -8,7 +8,7 @@ default = ["sqlite"]
 # behave like original sync server
 original = ["migrate-md5", "mysql"]
 migrate-md5 = []
-sqlite = ["diesel/sqlite"]
+sqlite = ["diesel/sqlite", "diesel_migrations/sqlite"]
 mysql = []
 
 [dependencies]
@@ -16,6 +16,7 @@ anyhow = "1.0.82"
 blake3 = "1.5.1"
 confique = { version = "0.2.5", default-features = false, features = ["toml"] }
 diesel = { version = "2.1.6", features = ["r2d2"] }
+diesel_migrations = "2.1.0"
 dotenvy = "0.15.7"
 jsonwebtoken = "9.3.0"
 log = { version = "0.4.21", features = ["kv"] }

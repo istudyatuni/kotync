@@ -1,11 +1,14 @@
-use anyhow::{Context, Result};
+use anyhow::{anyhow, Context, Result};
 use diesel::prelude::*;
 use diesel::r2d2::{ConnectionManager, Pool, PooledConnection};
 
 #[cfg(feature = "sqlite")]
-use diesel::prelude::SqliteConnection as DbConnection;
+use diesel::{prelude::SqliteConnection as DbConnection, sqlite::Sqlite as Backend};
+use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
 use crate::models::db::User;
+
+const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
 
 pub struct DB {
     conn: Pool<ConnectionManager<DbConnection>>,
@@ -13,6 +16,9 @@ pub struct DB {
 
 impl DB {
     pub fn new(db_url: &str) -> Result<Self> {
+        let mut conn = DbConnection::establish(db_url)?;
+        migrate(&mut conn)?;
+
         let pool = Pool::builder()
             .max_size(16)
             .build(ConnectionManager::<DbConnection>::new(db_url))?;
@@ -52,4 +58,10 @@ impl DB {
     fn pool(&self) -> Result<PooledConnection<ConnectionManager<DbConnection>>> {
         self.conn.get().context("cannot get db.pool")
     }
+}
+
+fn migrate(conn: &mut impl MigrationHarness<Backend>) -> Result<()> {
+    conn.run_pending_migrations(MIGRATIONS)
+        .map_err(|e| anyhow!("failed to run migrations: {e}"))?;
+    Ok(())
 }

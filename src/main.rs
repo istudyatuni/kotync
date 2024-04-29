@@ -3,7 +3,7 @@ use std::{path::PathBuf, sync::OnceLock};
 use anyhow::{anyhow, Context, Result};
 use confique::Config;
 use log::LevelFilter;
-use rocket::routes;
+use rocket::{routes, Build, Rocket};
 use simplelog::{ColorChoice, ConfigBuilder, TermLogger, TerminalMode};
 
 use config::Conf;
@@ -19,10 +19,13 @@ mod routes;
 #[rustfmt::skip]
 mod schema;
 
-static SECRET: OnceLock<Conf> = OnceLock::new();
+#[cfg(test)]
+mod tests;
+
+static CONFIG: OnceLock<Conf> = OnceLock::new();
 
 fn get_config() -> Result<&'static Conf> {
-    crate::SECRET
+    crate::CONFIG
         .get()
         .ok_or(anyhow!("failed to get config from static"))
 }
@@ -34,21 +37,22 @@ async fn main() -> Result<()> {
 
     let config = Conf::builder().env().file("config.toml").load()?;
     log::info!("loaded config: {config:#?}");
-
-    let db = DB::new(&config.db.url)?;
-
-    SECRET
-        .set(config.clone())
-        .map_err(|_| anyhow!("failed to save jwt.secret to static"))?;
-
-    let _rocket = rocket::build()
-        .manage(config)
-        .manage(db)
-        .mount("/", routes![routes::root, routes::auth, routes::me])
-        .launch()
-        .await?;
+    rocket(config)?.launch().await?;
 
     Ok(())
+}
+
+fn rocket(config: Conf) -> Result<Rocket<Build>> {
+    let db = DB::new(&config.db.url)?;
+
+    // get_or_init because of tests
+    CONFIG.get_or_init(|| config.clone());
+
+    let rocket = rocket::build()
+        .manage(config)
+        .manage(db)
+        .mount("/", routes![routes::root, routes::auth, routes::me]);
+    Ok(rocket)
 }
 
 fn dotenv() -> Result<()> {
