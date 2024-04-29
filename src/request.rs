@@ -6,6 +6,18 @@ use rocket::{
 use crate::jwt::validate;
 
 /// When added to request handler arguments, performs validation of Bearer token
+///
+/// ```
+/// #[get("/me")]
+/// pub fn me(token: ApiToken) {}
+/// ```
+///
+/// Error could be retrived:
+///
+/// ```
+/// #[get("/me")]
+/// pub fn me(token: Result<ApiToken, AuthError>) {}
+/// ```
 #[derive(Debug)]
 pub struct ApiToken {
     pub user_id: i32,
