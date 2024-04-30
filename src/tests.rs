@@ -159,9 +159,84 @@ fn test_list_history() -> Result<()> {
 }
 
 #[test]
-#[ignore = "not yet implemented"]
+fn test_list_manga_invalid_params() -> Result<()> {
+    let client = prepare_client()?;
+    let auth = make_user(&client);
+
+    let req = client
+        .get("/manga")
+        .header(Header::new(AUTHORIZATION.as_str(), auth.clone()));
+
+    let resp = req.clone().dispatch();
+
+    assert_eq!(resp.status(), Status::BadRequest);
+    assert_eq!(resp.into_string().unwrap(), "offset is required");
+
+    let mut req = req;
+    req.set_uri(uri!("/manga?offset=0"));
+    let resp = req.clone().dispatch();
+
+    assert_eq!(resp.status(), Status::BadRequest);
+    assert_eq!(resp.into_string().unwrap(), "limit is required");
+
+    req.set_uri(uri!("/manga?offset=0&limit=10000"));
+    let resp = req.clone().dispatch();
+
+    assert_eq!(resp.status(), Status::BadRequest);
+    assert_eq!(resp.into_string().unwrap(), "max limit is 1000");
+
+    Ok(())
+}
+
+#[test]
 fn test_list_manga() -> Result<()> {
-    todo!("get /manga")
+    let client = prepare_client()?;
+    let auth = make_user(&client);
+
+    // prepare
+
+    let req = client
+        .post(uri!(RESOURCE.clone(), routes::resource::save_favourites))
+        .header(Header::new(AUTHORIZATION.as_str(), auth.clone()));
+
+    let data = data::favourites_package();
+    let resp = req.clone().json(&data).dispatch();
+    assert_eq!(resp.status(), Status::Ok);
+
+    let new_manga_id = 2;
+
+    let mut data = data;
+    data.favourites[0].manga_id = new_manga_id;
+    data.favourites[0].manga.id = new_manga_id;
+    let resp = req.clone().json(&data).dispatch();
+    assert_eq!(resp.status(), Status::Ok);
+
+    // check
+
+    let req = client
+        .get(uri!(routes::base::list_manga(Some(0), Some(1))))
+        .header(Header::new(AUTHORIZATION.as_str(), auth.clone()));
+
+    let resp = req.clone().dispatch();
+    assert_eq!(resp.status(), Status::Ok);
+    let resp: Vec<common::Manga> = resp.into_json().unwrap();
+    assert_eq!(resp.len(), 1);
+
+    let mut manga = data::manga();
+    assert_eq!(resp[0], manga);
+
+    let mut req = req;
+    req.set_uri(uri!(routes::base::list_manga(Some(1), Some(2))));
+    let resp = req.clone().dispatch();
+    assert_eq!(resp.status(), Status::Ok);
+
+    let resp: Vec<common::Manga> = resp.into_json().unwrap();
+    assert_eq!(resp.len(), 1);
+
+    manga.id = new_manga_id;
+    assert_eq!(resp[0], manga);
+
+    Ok(())
 }
 
 #[test]

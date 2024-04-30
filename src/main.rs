@@ -1,4 +1,3 @@
-
 use std::{path::PathBuf, str::FromStr, sync::OnceLock, time::SystemTime};
 
 use anyhow::{anyhow, Context, Result};
@@ -57,6 +56,7 @@ fn rocket(config: Conf) -> Result<Rocket<Build>> {
                 routes::base::auth,
                 routes::base::me,
                 routes::base::get_manga,
+                routes::base::list_manga,
             ],
         )
         .mount(

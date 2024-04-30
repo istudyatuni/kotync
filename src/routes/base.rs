@@ -79,3 +79,40 @@ pub fn get_manga(id: i64, db: &State<DB>) -> Response<Option<Json<common::Manga>
         Json(manga.to_api(tags.iter().map(|t| t.to_api()).collect()))
     })))
 }
+
+#[get("/manga?<offset>&<limit>")]
+pub fn list_manga(
+    offset: Option<usize>,
+    limit: Option<usize>,
+    db: &State<DB>,
+) -> Response<Json<Vec<common::Manga>>> {
+    let Some(offset) = offset else {
+        return Err(ResponseData::StatusMessage(Custom(
+            Status::BadRequest,
+            "offset is required".to_string(),
+        )));
+    };
+    let Some(limit) = limit else {
+        return Err(ResponseData::StatusMessage(Custom(
+            Status::BadRequest,
+            "limit is required".to_string(),
+        )));
+    };
+    if limit > 1000 {
+        return Err(ResponseData::StatusMessage(Custom(
+            Status::BadRequest,
+            "max limit is 1000".to_string(),
+        )));
+    }
+
+    let list = db
+        .list_manga(offset, limit)
+        .map_err(|e| {
+            log::error!("failed to list manga: {e}");
+            ResponseData::Status(Status::InternalServerError)
+        })?
+        .into_iter()
+        .map(|(manga, tags)| manga.to_api(tags.into_iter().map(|t| t.to_api()).collect()))
+        .collect();
+    Ok(ResponseData::Body(Json(list)))
+}

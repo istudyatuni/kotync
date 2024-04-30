@@ -7,6 +7,7 @@ use diesel::{prelude::SqliteConnection as DbConnection, sqlite::Sqlite as Backen
 
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
+use crate::models::db::MangaTags;
 use crate::models::{
     common::{FavouritesPackage, Time, UserID},
     db::{Category, Favourite, Manga, Tag, User},
@@ -163,6 +164,29 @@ impl DB {
         let tags = self.list_tags(manga.id)?;
         Ok(Some((manga, tags)))
     }
+    pub fn list_manga(&self, offset: usize, limit: usize) -> Result<Vec<(Manga, Vec<Tag>)>> {
+        use super::schema::{manga, tags};
+
+        let conn = &mut self.pool()?;
+        let all_manga = manga::table
+            .select(Manga::as_select())
+            .offset(offset as i64)
+            .limit(limit as i64)
+            .load(conn)?;
+        let manga_list = manga::table.select(Manga::as_select()).load(conn)?;
+
+        let all_manga_tags = MangaTags::belonging_to(&manga_list)
+            .inner_join(tags::table)
+            .select((MangaTags::as_select(), Tag::as_select()))
+            .load(conn)?;
+
+        Ok(all_manga_tags
+            .grouped_by(&manga_list)
+            .into_iter()
+            .zip(all_manga)
+            .map(|(tag, m)| (m, tag.into_iter().map(|(_, t)| t).collect()))
+            .collect())
+    }
     fn add_favourite(conn: &mut Conn, favourite: Favourite) -> Result<()> {
         use super::schema::favourites::dsl::favourites;
 
@@ -193,7 +217,6 @@ impl DB {
         };
 
         let conn = &mut self.pool()?;
-
         let tag_ids: Vec<i64> = manga_tags
             .filter(manga_id_col.eq(manga_id))
             .select(manga_tag_id_col)
