@@ -64,6 +64,8 @@ fn rocket(config: Conf) -> Result<Rocket<Build>> {
             routes![
                 routes::resource::save_favourites,
                 routes::resource::get_favourites,
+                routes::resource::save_history,
+                routes::resource::get_history,
             ],
         );
     Ok(rocket)

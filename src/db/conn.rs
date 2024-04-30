@@ -7,7 +7,8 @@ use diesel::{prelude::SqliteConnection as DbConnection, sqlite::Sqlite as Backen
 
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
-use crate::models::db::MangaTags;
+use crate::models::common::HistoryPackage;
+use crate::models::db::{History, MangaTags};
 use crate::models::{
     common::{FavouritesPackage, Time, UserID},
     db::{Category, Favourite, Manga, Tag, User},
@@ -63,14 +64,22 @@ impl DB {
 
         self.get_user_by_email(email).map(|u| u.unwrap())
     }
-    pub fn set_favouries_synchronized(&self, user_id: UserID, time: Time) -> Result<()> {
+    pub fn set_favourites_synchronized(&self, user_id: UserID, time: Time) -> Result<()> {
         use super::schema::users::dsl::{favourites_sync_timestamp, id, users};
 
         diesel::update(users)
             .filter(id.eq(user_id))
             .set(favourites_sync_timestamp.eq(time))
             .execute(&mut self.pool()?)?;
+        Ok(())
+    }
+    pub fn set_history_synchronized(&self, user_id: UserID, time: Time) -> Result<()> {
+        use super::schema::users::dsl::{history_sync_timestamp, id, users};
 
+        diesel::update(users)
+            .filter(id.eq(user_id))
+            .set(history_sync_timestamp.eq(time))
+            .execute(&mut self.pool()?)?;
         Ok(())
     }
     pub fn add_favourites_package(&self, pkg: &FavouritesPackage, user_id: UserID) -> Result<()> {
@@ -90,7 +99,22 @@ impl DB {
             }
             Ok(())
         })?;
-
+        Ok(())
+    }
+    pub fn add_history_package(&self, pkg: &HistoryPackage, user_id: UserID) -> Result<()> {
+        let conn = &mut self.pool()?;
+        conn.transaction::<_, anyhow::Error, _>(|conn| {
+            for h in &pkg.history {
+                Self::add_manga(conn, h.manga.to_db())?;
+                Self::add_tags(
+                    conn,
+                    h.manga.tags.iter().map(|t| t.to_db()).collect(),
+                    h.manga_id,
+                )?;
+                Self::add_history(conn, h.to_db(user_id))?;
+            }
+            Ok(())
+        })?;
         Ok(())
     }
     pub fn load_favourites_package(&self, user_id: UserID) -> Result<FavouritesPackage> {
@@ -114,6 +138,23 @@ impl DB {
                 .and_then(|u| u.favourites_sync_timestamp),
         })
     }
+    pub fn load_history_package(&self, user_id: UserID) -> Result<HistoryPackage> {
+        let history = self.list_history(user_id)?;
+
+        Ok(HistoryPackage {
+            history: history
+                .iter()
+                .map(|(hist, manga)| -> Result<_> {
+                    // todo: same as in load_favourites_package
+                    let tags: Vec<Tag> = self.list_tags(manga.id)?;
+                    Ok(hist.to_api(manga.to_api(tags.iter().map(|t| t.to_api()).collect())))
+                })
+                .collect::<Result<Vec<_>>>()?,
+            timestamp: self
+                .get_user(user_id)?
+                .and_then(|u| u.history_sync_timestamp),
+        })
+    }
     fn list_favourites(&self, user_id: UserID) -> Result<Vec<(Favourite, Manga)>> {
         use super::schema::favourites::dsl::user_id as user_id_col;
         use super::schema::{favourites, manga};
@@ -122,6 +163,16 @@ impl DB {
             .inner_join(manga::table)
             .filter(user_id_col.eq(user_id))
             .select((Favourite::as_select(), Manga::as_select()))
+            .load(&mut self.pool()?)?)
+    }
+    fn list_history(&self, user_id: UserID) -> Result<Vec<(History, Manga)>> {
+        use super::schema::history::dsl::user_id as user_id_col;
+        use super::schema::{history, manga};
+
+        Ok(history::table
+            .inner_join(manga::table)
+            .filter(user_id_col.eq(user_id))
+            .select((History::as_select(), Manga::as_select()))
             .load(&mut self.pool()?)?)
     }
     fn add_category(conn: &mut Conn, category: Category) -> Result<()> {
@@ -147,7 +198,14 @@ impl DB {
         diesel::replace_into(manga_table)
             .values(vec![manga])
             .execute(conn)?;
+        Ok(())
+    }
+    fn add_history(conn: &mut Conn, history: History) -> Result<()> {
+        use super::schema::history::dsl::history as history_table;
 
+        diesel::replace_into(history_table)
+            .values(vec![history])
+            .execute(conn)?;
         Ok(())
     }
     pub fn get_manga(&self, manga_id: i64) -> Result<Option<(Manga, Vec<Tag>)>> {
@@ -193,7 +251,6 @@ impl DB {
         diesel::replace_into(favourites)
             .values(vec![favourite])
             .execute(conn)?;
-
         Ok(())
     }
     fn add_tags(conn: &mut Conn, tags: Vec<Tag>, manga_id: i64) -> Result<()> {
@@ -203,11 +260,11 @@ impl DB {
         diesel::replace_into(tags_table)
             .values(&tags)
             .execute(conn)?;
+
         let tags: Vec<_> = tags.iter().map(|t| t.to_join(manga_id)).collect();
         diesel::replace_into(manga_tags)
             .values(tags)
             .execute(conn)?;
-
         Ok(())
     }
     fn list_tags(&self, manga_id: i64) -> Result<Vec<Tag>> {

@@ -4,7 +4,10 @@ use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
 
 use super::{
-    db::{Category as DBCategory, Favourite as DBFavourite, Manga as DBManga, Tag as DBTag},
+    db::{
+        Category as DBCategory, Favourite as DBFavourite, History as DBHistory, Manga as DBManga,
+        Tag as DBTag,
+    },
     IntToBool, TruncatedString,
 };
 
@@ -63,6 +66,12 @@ pub struct FavouritesPackage {
 }
 
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
+pub struct HistoryPackage {
+    pub history: Vec<History>,
+    pub timestamp: Option<Time>,
+}
+
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub struct Category {
     #[serde(rename = "category_id")]
     pub id: i64,
@@ -109,6 +118,42 @@ impl Favourite {
             category_id: self.category_id,
             sort_key: self.sort_key,
             created_at: self.created_at,
+            deleted_at: self.deleted_at,
+            user_id,
+        }
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
+pub struct History {
+    pub manga_id: i64,
+    pub manga: Manga,
+    pub created_at: Time,
+    pub updated_at: Time,
+    pub chapter_id: i64,
+    pub page: i32,
+    pub scroll: f64,
+    pub percent: f64,
+    #[serde(default = "minus_1")]
+    pub chapters: i32,
+    pub deleted_at: Time,
+}
+
+const fn minus_1() -> i32 {
+    -1
+}
+
+impl History {
+    pub fn to_db(&self, user_id: UserID) -> DBHistory {
+        DBHistory {
+            manga_id: self.manga.id,
+            created_at: self.created_at,
+            updated_at: self.updated_at,
+            chapter_id: self.chapter_id,
+            page: self.page as i16,
+            scroll: self.scroll,
+            percent: self.percent,
+            chapters: self.chapters,
             deleted_at: self.deleted_at,
             user_id,
         }

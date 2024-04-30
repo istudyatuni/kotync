@@ -3,8 +3,8 @@ use std::str::FromStr;
 use diesel::prelude::*;
 
 use super::common::{
-    Category as ApiCategory, Favourite as ApiFavourite, Manga as ApiManga, MangaState,
-    MangaTag as ApiMangaTag, Time, UserID,
+    Category as ApiCategory, Favourite as ApiFavourite, History as ApiHistory, Manga as ApiManga,
+    MangaState, MangaTag as ApiMangaTag, Time, UserID,
 };
 
 #[derive(Queryable, Selectable, Insertable, Identifiable, Debug)]
@@ -71,7 +71,7 @@ impl Favourite {
 	table_name = crate::db::schema::history,
 	check_for_backend(diesel::sqlite::Sqlite)
 )]
-pub struct HistoryEntry {
+pub struct History {
     pub manga_id: i64,
     pub created_at: Time,
     pub updated_at: Time,
@@ -82,6 +82,23 @@ pub struct HistoryEntry {
     pub chapters: i32,
     pub deleted_at: Time,
     pub user_id: UserID,
+}
+
+impl History {
+    pub fn to_api(&self, manga: ApiManga) -> ApiHistory {
+        ApiHistory {
+            manga_id: manga.id,
+            manga,
+            created_at: self.created_at,
+            updated_at: self.updated_at,
+            chapter_id: self.chapter_id,
+            page: self.page as i32,
+            scroll: self.scroll,
+            percent: self.percent,
+            chapters: self.chapters,
+            deleted_at: self.deleted_at,
+        }
+    }
 }
 
 #[derive(Queryable, Selectable, Insertable, Identifiable, Debug)]

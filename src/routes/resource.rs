@@ -23,7 +23,7 @@ pub fn save_favourites(
         ResponseData::Status(Status::InternalServerError)
     })?;
 
-    db.set_favouries_synchronized(user.id, current_timestamp().unwrap_or_default())
+    db.set_favourites_synchronized(user.id, current_timestamp().unwrap_or_default())
         .map_err(|e| {
             log::error!(
                 "failed to set favourites_sync_timestamp for user {}: {e}",
@@ -58,6 +58,53 @@ pub fn get_favourites(
             "failed to load favourites_package for user {}: {e}",
             user.id
         );
+        ResponseData::Status(Status::InternalServerError)
+    })?;
+    Ok(ResponseData::Body(Json(data)))
+}
+
+#[post("/history", data = "<req>")]
+pub fn save_history(
+    req: Json<common::HistoryPackage>,
+    token: Result<ApiToken, AuthError>,
+    db: &State<DB>,
+) -> Response<Json<common::HistoryPackage>> {
+    let user = user_by_token(token, db)?;
+
+    db.add_history_package(&req.0, user.id).map_err(|e| {
+        log::error!("failed to add history package: {e}");
+        ResponseData::Status(Status::InternalServerError)
+    })?;
+
+    db.set_history_synchronized(user.id, current_timestamp().unwrap_or_default())
+        .map_err(|e| {
+            log::error!(
+                "failed to set history_sync_timestamp for user {}: {e}",
+                user.id
+            );
+            ResponseData::Status(Status::InternalServerError)
+        })?;
+
+    let data = db.load_history_package(user.id).map_err(|e| {
+        log::error!("failed to load history_package for user {}: {e}", user.id);
+        ResponseData::Status(Status::InternalServerError)
+    })?;
+
+    match req.0 == data {
+        // is this real usecase?
+        true => Ok(ResponseData::Status(Status::NoContent)),
+        false => Ok(ResponseData::Body(Json(data))),
+    }
+}
+
+#[get("/history")]
+pub fn get_history(
+    token: Result<ApiToken, AuthError>,
+    db: &State<DB>,
+) -> Response<Json<common::HistoryPackage>> {
+    let user = user_by_token(token, db)?;
+    let data = db.load_history_package(user.id).map_err(|e| {
+        log::error!("failed to load history_package for user {}: {e}", user.id);
         ResponseData::Status(Status::InternalServerError)
     })?;
     Ok(ResponseData::Body(Json(data)))

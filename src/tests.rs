@@ -147,15 +147,42 @@ fn test_sync_favourites() -> Result<()> {
 }
 
 #[test]
-#[ignore = "not yet implemented"]
-fn test_post_history() -> Result<()> {
-    todo!("post /resource/history")
-}
+fn test_sync_history() -> Result<()> {
+    let client = prepare_client()?;
+    let auth = make_user(&client);
 
-#[test]
-#[ignore = "not yet implemented"]
-fn test_list_history() -> Result<()> {
-    todo!("get /resource/history")
+    let data = data::history_package();
+
+    let resp = client
+        .post(uri!(RESOURCE.clone(), routes::resource::save_history))
+        .json(&data)
+        .header(Header::new(AUTHORIZATION.as_str(), auth.clone()))
+        .dispatch();
+
+    assert_eq!(resp.status(), Status::Ok);
+
+    let resp = client
+        .get(uri!(RESOURCE.clone(), routes::resource::get_history))
+        .header(Header::new(AUTHORIZATION.as_str(), auth))
+        .dispatch();
+
+    assert_eq!(resp.status(), Status::Ok);
+
+    let mut data = data;
+    let sent_timestamp = data.timestamp.take();
+
+    let mut resp: common::HistoryPackage = resp.into_json().unwrap();
+    let timestamp = resp.timestamp.take();
+
+    assert_eq!(data, resp);
+    assert!(timestamp < current_timestamp());
+    if let Some(sent_timestamp) = sent_timestamp {
+        assert!(timestamp.is_some_and(|t| t > sent_timestamp));
+    } else {
+        assert!(timestamp.is_some());
+    }
+
+    Ok(())
 }
 
 #[test]
@@ -295,6 +322,24 @@ mod data {
                 sort_key: 1,
                 created_at: now,
                 deleted_at: now,
+            }],
+            timestamp: Some(now),
+        }
+    }
+    pub fn history_package() -> common::HistoryPackage {
+        let now = current_timestamp().unwrap();
+        common::HistoryPackage {
+            history: vec![common::History {
+                manga_id: 1,
+                manga: manga(),
+                created_at: now,
+                updated_at: now,
+                chapter_id: 1,
+                page: 1,
+                scroll: 2.3,
+                percent: 1.2,
+                chapters: 34,
+                deleted_at: 0,
             }],
             timestamp: Some(now),
         }
