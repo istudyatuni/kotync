@@ -54,6 +54,16 @@ fn test_auth_create_user() -> Result<()> {
     let resp: response::Me = resp.into_json().unwrap();
     assert_eq!(resp.email, email);
 
+    let resp = client
+        .post(uri!(routes::base::auth))
+        .json(&request::Auth {
+            email: "test2@example.com".to_string(),
+            password: "test".to_string(),
+        })
+        .dispatch();
+
+    assert_eq!(resp.status(), Status::Ok);
+
     Ok(())
 }
 

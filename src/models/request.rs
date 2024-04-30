@@ -1,11 +1,8 @@
 use anyhow::Result;
 use serde::Deserialize;
 
-#[cfg(test)]
-use serde::Serialize;
-
 #[derive(Debug, Clone, Deserialize)]
-#[cfg_attr(test, derive(Serialize))]
+#[cfg_attr(test, derive(serde::Serialize))]
 pub struct Auth {
     pub email: String,
     pub password: String,
