@@ -3,7 +3,7 @@ use rocket::{
     request::{FromRequest, Outcome, Request},
 };
 
-use crate::jwt::validate;
+use crate::{jwt::validate, models::common::UserID};
 
 /// When added to request handler arguments, performs validation of Bearer token
 ///
@@ -20,7 +20,7 @@ use crate::jwt::validate;
 /// ```
 #[derive(Debug)]
 pub struct ApiToken {
-    pub user_id: i32,
+    pub user_id: UserID,
 }
 
 #[derive(Debug, thiserror::Error)]

@@ -4,7 +4,7 @@ use jsonwebtoken::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::config::ConfJWT;
+use crate::{config::ConfJWT, models::common::UserID};
 
 /// 30 days
 const LIFETIME_SEC: u64 = 30 * 24 * 60 * 60;
@@ -13,11 +13,11 @@ const LIFETIME_SEC: u64 = 30 * 24 * 60 * 60;
 pub struct Claims {
     pub aud: String,
     pub iss: String,
-    pub user_id: i32,
+    pub user_id: UserID,
     pub exp: u64,
 }
 
-pub fn generate(user_id: i32, config: &ConfJWT) -> Result<String> {
+pub fn generate(user_id: UserID, config: &ConfJWT) -> Result<String> {
     Ok(encode(
         &Header::default(),
         &Claims {
@@ -30,7 +30,7 @@ pub fn generate(user_id: i32, config: &ConfJWT) -> Result<String> {
     )?)
 }
 
-pub fn validate(token: &str) -> Result<i32> {
+pub fn validate(token: &str) -> Result<UserID> {
     let config = crate::get_config()?;
     let mut validation = Validation::default();
     validation.set_audience(&[&config.jwt.audience]);

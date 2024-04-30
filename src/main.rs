@@ -1,4 +1,5 @@
-use std::{path::PathBuf, str::FromStr, sync::OnceLock};
+
+use std::{path::PathBuf, str::FromStr, sync::OnceLock, time::SystemTime};
 
 use anyhow::{anyhow, Context, Result};
 use confique::Config;
@@ -8,6 +9,7 @@ use simplelog::{ColorChoice, ConfigBuilder, TermLogger, TerminalMode};
 
 use config::Conf;
 use db::conn::DB;
+use models::common::Time;
 
 mod config;
 mod db;
@@ -52,7 +54,13 @@ fn rocket(config: Conf) -> Result<Rocket<Build>> {
             "/",
             routes![routes::base::root, routes::base::auth, routes::base::me],
         )
-        .mount("/resource", routes![routes::resource::save_favourites]);
+        .mount(
+            "/resource",
+            routes![
+                routes::resource::save_favourites,
+                routes::resource::get_favourites
+            ],
+        );
     Ok(rocket)
 }
 
@@ -92,4 +100,12 @@ fn init_logger() -> Result<()> {
     )?;
 
     Ok(())
+}
+
+/// Current system time in milliseconds
+pub fn current_timestamp() -> Option<Time> {
+    SystemTime::now()
+        .duration_since(SystemTime::UNIX_EPOCH)
+        .ok()
+        .map(|d| d.as_millis() as Time)
 }

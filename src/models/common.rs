@@ -1,0 +1,174 @@
+use std::{fmt::Display, str::FromStr};
+
+use anyhow::anyhow;
+use serde::{Deserialize, Serialize};
+
+use super::{
+    db::{Category as DBCategory, Favourite as DBFavourite, Manga as DBManga, Tag as DBTag},
+    IntToBool, TruncatedString,
+};
+
+pub type Time = i64;
+pub type UserID = i32;
+
+#[derive(Debug, Clone, Copy, PartialEq, Deserialize, Serialize, Default)]
+pub enum MangaState {
+    #[default]
+    #[serde(rename = "ONGOING")]
+    Ongoing,
+    #[serde(rename = "FINISHED")]
+    Finished,
+    #[serde(rename = "ABANDONED")]
+    Abandoned,
+    #[serde(rename = "PAUSED")]
+    Paused,
+    #[serde(rename = "UPCOMING")]
+    Upcoming,
+}
+
+impl Display for MangaState {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            MangaState::Ongoing => "ONGOING",
+            MangaState::Finished => "FINISHED",
+            MangaState::Abandoned => "ABANDONED",
+            MangaState::Paused => "PAUSED",
+            MangaState::Upcoming => "UPCOMING",
+        };
+        f.pad(s)
+    }
+}
+
+impl FromStr for MangaState {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "ONGOING" => Ok(Self::Ongoing),
+            "FINISHED" => Ok(Self::Finished),
+            "ABANDONED" => Ok(Self::Abandoned),
+            "PAUSED" => Ok(Self::Paused),
+            "UPCOMING" => Ok(Self::Upcoming),
+            _ => Err(anyhow!("unknown manga state")),
+        }
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
+pub struct FavouritesPackage {
+    #[serde(rename = "favourite_categories")]
+    pub categories: Vec<Category>,
+    pub favourites: Vec<Favourite>,
+    pub timestamp: Option<Time>,
+}
+
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
+pub struct Category {
+    #[serde(rename = "category_id")]
+    pub id: i64,
+    pub created_at: Time,
+    pub sort_key: i32,
+    pub track: i32,
+    pub title: String,
+    pub order: String,
+    pub deleted_at: Time,
+    pub show_in_lib: i32,
+}
+
+impl Category {
+    pub fn to_db(&self, user_id: i32) -> DBCategory {
+        DBCategory {
+            id: self.id,
+            created_at: self.created_at,
+            sort_key: self.sort_key,
+            title: self.title.truncated(120),
+            order: self.order.clone(),
+            user_id,
+            track: self.track.to_bool(),
+            show_in_lib: self.show_in_lib.to_bool(),
+            deleted_at: self.deleted_at,
+        }
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
+pub struct Favourite {
+    pub manga_id: i64,
+    pub manga: Manga,
+    // original is i32
+    pub category_id: i64,
+    pub sort_key: i32,
+    pub created_at: Time,
+    pub deleted_at: Time,
+}
+
+impl Favourite {
+    pub fn to_db(&self, user_id: UserID) -> DBFavourite {
+        DBFavourite {
+            manga_id: self.manga_id,
+            category_id: self.category_id,
+            sort_key: self.sort_key,
+            created_at: self.created_at,
+            deleted_at: self.deleted_at,
+            user_id,
+        }
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
+pub struct Manga {
+    #[serde(rename = "manga_id")]
+    pub id: i64,
+    pub title: String,
+    pub alt_title: Option<String>,
+    pub url: String,
+    pub public_url: String,
+    pub rating: f32,
+    #[serde(rename = "nsfw")]
+    pub is_nsfw: i32,
+    pub cover_url: String,
+    pub large_cover_url: Option<String>,
+    pub tags: Vec<MangaTag>,
+    pub state: Option<MangaState>,
+    pub author: Option<String>,
+    pub source: String,
+}
+
+impl Manga {
+    pub fn to_db(&self) -> DBManga {
+        DBManga {
+            id: self.id,
+            title: self.title.truncated(84),
+            alt_title: self.alt_title.clone().map(|t| t.truncated(84)),
+            url: self.url.truncated(255),
+            public_url: self.public_url.truncated(255),
+            rating: self.rating,
+            is_nsfw: self.is_nsfw.to_bool(),
+            cover_url: self.cover_url.truncated(255),
+            large_cover_url: None, // ignored?
+            state: self.state.map(|s| s.to_string()),
+            author: self.author.clone().map(|p| p.truncated(32)),
+            source: self.source.truncated(32),
+        }
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
+pub struct MangaTag {
+    #[serde(rename = "tag_id")]
+    pub id: i64,
+    pub title: String,
+    pub key: String,
+    pub source: String,
+}
+
+impl MangaTag {
+    pub fn to_db(&self) -> DBTag {
+        DBTag {
+            id: self.id,
+            title: self.title.clone(),
+            key: self.key.clone(),
+            source: self.source.clone(),
+        }
+    }
+}
