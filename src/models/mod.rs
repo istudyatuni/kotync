@@ -1,3 +1,5 @@
+use unicode_segmentation::UnicodeSegmentation;
+
 pub mod common;
 pub mod db;
 pub mod request;
@@ -14,15 +16,12 @@ impl IntToBool for i32 {
     }
 }
 
-// Simplification, since String::truncate modifies string inplace
 trait TruncatedString {
     fn truncated(&self, len: usize) -> String;
 }
 
 impl TruncatedString for String {
     fn truncated(&self, len: usize) -> String {
-        let mut s = self.clone();
-        s.truncate(len);
-        s
+        self.graphemes(true).take(len).collect()
     }
 }
