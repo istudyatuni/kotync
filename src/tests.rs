@@ -130,8 +130,6 @@ fn test_sync_favourites() -> Result<()> {
     assert_eq!(resp.status(), Status::Ok);
 
     let mut data = data;
-    // todo: tags
-    data.favourites[0].manga.tags.clear();
     let sent_timestamp = data.timestamp.take();
 
     let mut resp: common::FavouritesPackage = resp.into_json().unwrap();

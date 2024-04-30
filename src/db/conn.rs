@@ -89,24 +89,25 @@ impl DB {
             categories: categories.iter().map(|c| c.to_api()).collect(),
             favourites: favourites
                 .iter()
-                // todo: tags
-                .map(|(f, m)| f.to_api(m.to_api(vec![])))
-                .collect(),
+                .map(|(fav, manga)| -> Result<_> {
+                    // todo: maybe try to load manga with tags in one query
+                    // (it was hard to understand how to do it)
+                    // https://diesel.rs/guides/relations.html
+                    let tags: Vec<Tag> = self.list_tags(manga.id)?;
+                    Ok(fav.to_api(manga.to_api(tags.iter().map(|t| t.to_api()).collect())))
+                })
+                .collect::<Result<Vec<_>>>()?,
             timestamp: self
                 .get_user(user_id)?
                 .and_then(|u| u.favourites_sync_timestamp),
         })
     }
-    pub fn list_favourites(
-        &self,
-        user_id: UserID,
-    ) -> Result<Vec<(Favourite, /*(*/ Manga /*, Vec<Tag>)*/)>> {
+    pub fn list_favourites(&self, user_id: UserID) -> Result<Vec<(Favourite, Manga)>> {
         use super::schema::favourites::dsl::user_id as user_id_col;
         use super::schema::{favourites, manga};
 
         Ok(favourites::table
             .inner_join(manga::table)
-            // .inner_join(tags::table)
             .filter(user_id_col.eq(user_id))
             .select((Favourite::as_select(), Manga::as_select()))
             .load(&mut self.pool()?)?)
@@ -161,6 +162,23 @@ impl DB {
             .execute(conn)?;
 
         Ok(())
+    }
+    pub fn list_tags(&self, manga_id: i64) -> Result<Vec<Tag>> {
+        use super::schema::{
+            manga_tags::dsl::{manga_id as manga_id_col, manga_tags, tag_id as manga_tag_id_col},
+            tags::dsl::{id as tags_id_col, tags},
+        };
+
+        let conn = &mut self.pool()?;
+
+        let tag_ids: Vec<i64> = manga_tags
+            .filter(manga_id_col.eq(manga_id))
+            .select(manga_tag_id_col)
+            .load(conn)?;
+        Ok(tags
+            .filter(tags_id_col.eq_any(tag_ids))
+            .select(Tag::as_select())
+            .load(conn)?)
     }
     fn pool(&self) -> Result<PooledConnection<ConnectionManager<DbConnection>>> {
         self.conn.get().context("cannot get db.pool")
