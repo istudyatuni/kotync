@@ -184,7 +184,7 @@ impl Tag {
     }
 }
 
-#[derive(Queryable, Selectable, Insertable, Identifiable, Debug, Default)]
+#[derive(Queryable, Selectable, Identifiable, Debug, Default)]
 #[diesel(
 	table_name = crate::db::schema::users,
 	check_for_backend(diesel::sqlite::Sqlite)
@@ -196,4 +196,14 @@ pub struct User {
     pub nickname: Option<String>,
     pub favourites_sync_timestamp: Option<Time>,
     pub history_sync_timestamp: Option<Time>,
+}
+
+#[derive(Insertable, Debug)]
+#[diesel(
+    table_name = crate::db::schema::users,
+    check_for_backend(diesel::sqlite::Sqlite)
+)]
+pub struct UserInsert {
+    pub email: String,
+    pub password: String,
 }

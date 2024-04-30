@@ -11,7 +11,7 @@ use crate::models::common::HistoryPackage;
 use crate::models::db::{History, MangaTags};
 use crate::models::{
     common::{FavouritesPackage, Time, UserID},
-    db::{Category, Favourite, Manga, Tag, User},
+    db::{Category, Favourite, Manga, Tag, User, UserInsert},
 };
 
 const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
@@ -55,10 +55,9 @@ impl DB {
 
         // assuming that this user doesn't exists
         diesel::insert_into(users)
-            .values(User {
+            .values(UserInsert {
                 email: email.to_string(),
                 password: password.to_string(),
-                ..Default::default()
             })
             .execute(&mut self.pool()?)?;
 
