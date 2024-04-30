@@ -1,0 +1,26 @@
+services:
+  test-db:
+    image: mariadb:lts
+    environment:
+      MARIADB_USER: user
+      MARIADB_PASSWORD: asdf
+      MARIADB_DATABASE: kotatsu_db_test
+      MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: true
+    volumes:
+      - db_data:/var/lib/mariadb
+    ports:
+      - "3307:3306"
+  db:
+    image: mariadb:lts
+    environment:
+      MARIADB_USER: user
+      MARIADB_PASSWORD: password
+      MARIADB_DATABASE: kotatsu_db
+      MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: true
+    volumes:
+      - db_data:/var/lib/mariadb
+    ports:
+      - "3306:3306"
+
+volumes:
+  db_data:

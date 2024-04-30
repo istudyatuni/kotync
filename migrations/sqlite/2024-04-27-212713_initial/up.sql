@@ -38,7 +38,7 @@ create table if not exists manga_tags
             on delete cascade
 );
 
-create index if not exists tag_id
+create index tag_id
     on manga_tags (tag_id);
 
 create table if not exists users
@@ -68,7 +68,7 @@ create table if not exists categories
             on delete cascade
 );
 
-create index if not exists categories_id_index
+create index categories_id_index
     on categories (id);
 
 create table if not exists favourites
@@ -88,7 +88,7 @@ create table if not exists favourites
         foreign key (user_id) references users (id)
 );
 
-create index if not exists user_id
+create index user_id
     on favourites (user_id);
 
 create table if not exists history
@@ -111,7 +111,7 @@ create table if not exists history
             on delete cascade
 );
 
-create index if not exists manga_id
+create index manga_id
     on history (manga_id);
 
 create unique index users_email_uindex

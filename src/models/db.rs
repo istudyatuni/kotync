@@ -13,10 +13,11 @@ use super::common::{
     MangaState, MangaTag as ApiMangaTag, Time, UserID,
 };
 
-#[derive(Queryable, Selectable, Insertable, Identifiable, Debug)]
+#[derive(Queryable, Selectable, Insertable, Identifiable, AsChangeset, Debug)]
 #[diesel(
 	table_name = crate::db::schema::categories,
-	check_for_backend(Backend)
+	check_for_backend(Backend),
+    primary_key(id, user_id)
 )]
 pub struct Category {
     pub id: i64,
@@ -72,7 +73,7 @@ impl Favourite {
     }
 }
 
-#[derive(Queryable, Selectable, Insertable, Debug)]
+#[derive(Queryable, Selectable, Insertable, AsChangeset, Debug)]
 #[diesel(
 	table_name = crate::db::schema::history,
 	check_for_backend(Backend)
@@ -107,7 +108,7 @@ impl History {
     }
 }
 
-#[derive(Queryable, Selectable, Insertable, Identifiable, Debug)]
+#[derive(Queryable, Selectable, Insertable, Identifiable, AsChangeset, Debug)]
 #[diesel(
 	table_name = crate::db::schema::manga,
 	check_for_backend(Backend)
@@ -161,7 +162,7 @@ pub struct MangaTags {
     pub tag_id: i64,
 }
 
-#[derive(Queryable, Selectable, Insertable, Identifiable, Debug)]
+#[derive(Queryable, Selectable, Insertable, Identifiable, AsChangeset, Debug)]
 #[diesel(
 	table_name = crate::db::schema::tags,
 	check_for_backend(Backend)

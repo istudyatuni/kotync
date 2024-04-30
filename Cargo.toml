@@ -4,19 +4,23 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
-default = ["sqlite"]
+default = ["original"]
+new = ["sqlite"]
 # behave like original sync server
 original = ["migrate-md5", "mysql"]
 migrate-md5 = []
 sqlite = ["diesel/sqlite", "diesel_migrations/sqlite"]
-mysql = []
+mysql = ["diesel/mysql", "diesel_migrations/mysql"]
+
+# run migrations in mysql. todo: maybe unnecessary
+test-prepare = []
 
 [dependencies]
 anyhow = "1.0.82"
 blake3 = "1.5.1"
 confique = { version = "0.2.5", default-features = false, features = ["toml"] }
-diesel = { version = "2.1.6", features = ["r2d2"] }
-diesel_migrations = "2.1.0"
+diesel = { version = "2.2", features = ["r2d2"] }
+diesel_migrations = "2.2"
 dotenvy = "0.15.7"
 jsonwebtoken = "9.3.0"
 log = { version = "0.4.21", features = ["kv"] }
@@ -25,3 +29,6 @@ serde = { version = "1.0.199", features = ["derive"] }
 simplelog = "0.12.2"
 thiserror = "1.0.59"
 unicode-segmentation = "1.11.0"
+
+[dev-dependencies]
+similar-asserts = "1.5.0"

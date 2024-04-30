@@ -1,9 +1,14 @@
+#![cfg_attr(test, allow(unused))]
+
 use anyhow::{anyhow, Context, Result};
 use diesel::prelude::*;
 use diesel::r2d2::{ConnectionManager, Pool, PooledConnection};
 
 #[cfg(feature = "sqlite")]
 use diesel::{prelude::SqliteConnection as DbConnection, sqlite::Sqlite as Backend};
+
+#[cfg(feature = "mysql")]
+use diesel::{mysql::Mysql as Backend, prelude::MysqlConnection as DbConnection};
 
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
@@ -14,7 +19,11 @@ use crate::models::{
     db::{Category, Favourite, Manga, Tag, User, UserInsert},
 };
 
-const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
+#[cfg(feature = "sqlite")]
+const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/sqlite");
+
+#[cfg(feature = "mysql")]
+const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/mysql");
 
 type ConnManager = ConnectionManager<DbConnection>;
 type Conn = PooledConnection<ConnManager>;
@@ -25,11 +34,26 @@ pub struct DB {
 
 impl DB {
     pub fn new(db_url: &str) -> Result<Self> {
-        migrate(&mut DbConnection::establish(db_url)?)?;
-
         let pool = Pool::builder()
             .max_size(16)
-            .build(ConnectionManager::new(db_url))?;
+            .build(ConnectionManager::<DbConnection>::new(db_url))?;
+
+        #[allow(unused)]
+        let conn = &mut pool.get()?;
+        #[cfg(not(all(test, feature = "mysql")))]
+        migrate(conn)?;
+        #[cfg(all(test, feature = "mysql"))]
+        {
+            conn.begin_test_transaction()?;
+            diesel::sql_query("delete from history;").execute(conn)?;
+            diesel::sql_query("delete from favourites;").execute(conn)?;
+            diesel::sql_query("delete from categories;").execute(conn)?;
+            diesel::sql_query("delete from users;").execute(conn)?;
+            diesel::sql_query("delete from manga_tags;").execute(conn)?;
+            diesel::sql_query("delete from tags;").execute(conn)?;
+            diesel::sql_query("delete from manga;").execute(conn)?;
+        }
+
         Ok(Self { conn: pool })
     }
     pub fn get_user_by_email(&self, email: &str) -> Result<Option<User>> {
@@ -82,18 +106,25 @@ impl DB {
         Ok(())
     }
     pub fn add_favourites_package(&self, pkg: &FavouritesPackage, user_id: UserID) -> Result<()> {
+        log::info!("adding favourites_package for user {}", user_id);
+
         let conn = &mut self.pool()?;
+
         conn.transaction::<_, anyhow::Error, _>(|conn| {
             for c in &pkg.categories {
+                log::debug!("adding category {}", c.id);
                 Self::add_category(conn, c.to_db(user_id))?;
             }
             for f in &pkg.favourites {
+                log::debug!("adding manga {}", f.manga.id);
                 Self::add_manga(conn, f.manga.to_db())?;
+                log::debug!("adding tags for manga {}", f.manga.id);
                 Self::add_tags(
                     conn,
                     f.manga.tags.iter().map(|t| t.to_db()).collect(),
                     f.manga_id,
                 )?;
+                log::debug!("adding favourite for manga {}", f.manga.id);
                 Self::add_favourite(conn, f.to_db(user_id))?;
             }
             Ok(())
@@ -104,12 +135,15 @@ impl DB {
         let conn = &mut self.pool()?;
         conn.transaction::<_, anyhow::Error, _>(|conn| {
             for h in &pkg.history {
+                log::debug!("adding manga");
                 Self::add_manga(conn, h.manga.to_db())?;
+                log::debug!("adding tags");
                 Self::add_tags(
                     conn,
                     h.manga.tags.iter().map(|t| t.to_db()).collect(),
                     h.manga_id,
                 )?;
+                log::debug!("adding history entry");
                 Self::add_history(conn, h.to_db(user_id))?;
             }
             Ok(())
@@ -175,11 +209,18 @@ impl DB {
             .load(&mut self.pool()?)?)
     }
     fn add_category(conn: &mut Conn, category: Category) -> Result<()> {
-        use super::schema::categories::dsl::categories;
+        #[allow(unused)]
+        use super::schema::categories::dsl::{categories, id, user_id};
 
-        diesel::replace_into(categories)
-            .values(vec![category])
-            .execute(conn)?;
+        let q = diesel::insert_into(categories).values(&category);
+
+        #[cfg(feature = "mysql")]
+        let q = q.on_conflict(diesel::dsl::DuplicatedKeys);
+
+        #[cfg(feature = "sqlite")]
+        let q = q.on_conflict((id, user_id));
+
+        q.do_update().set(&category).execute(conn)?;
 
         Ok(())
     }
@@ -192,19 +233,33 @@ impl DB {
             .get_results(&mut self.pool()?)?)
     }
     fn add_manga(conn: &mut Conn, manga: Manga) -> Result<()> {
-        use super::schema::manga::dsl::manga as manga_table;
+        #[allow(unused)]
+        use super::schema::manga::dsl::{id, manga as manga_table};
 
-        diesel::replace_into(manga_table)
-            .values(vec![manga])
-            .execute(conn)?;
+        let q = diesel::insert_into(manga_table).values(&manga);
+
+        #[cfg(feature = "mysql")]
+        let q = q.on_conflict(diesel::dsl::DuplicatedKeys);
+
+        #[cfg(feature = "sqlite")]
+        let q = q.on_conflict((id,));
+
+        q.do_update().set(&manga).execute(conn)?;
         Ok(())
     }
     fn add_history(conn: &mut Conn, history: History) -> Result<()> {
-        use super::schema::history::dsl::history as history_table;
+        #[allow(unused)]
+        use super::schema::history::dsl::{history as history_table, manga_id, user_id};
 
-        diesel::replace_into(history_table)
-            .values(vec![history])
-            .execute(conn)?;
+        let q = diesel::insert_into(history_table).values(&history);
+
+        #[cfg(feature = "mysql")]
+        let q = q.on_conflict(diesel::dsl::DuplicatedKeys);
+
+        #[cfg(feature = "sqlite")]
+        let q = q.on_conflict((manga_id, user_id));
+
+        q.do_update().set(&history).execute(conn)?;
         Ok(())
     }
     pub fn get_manga(&self, manga_id: i64) -> Result<Option<(Manga, Vec<Tag>)>> {
@@ -254,16 +309,26 @@ impl DB {
     }
     fn add_tags(conn: &mut Conn, tags: Vec<Tag>, manga_id: i64) -> Result<()> {
         use super::schema::manga_tags::dsl::manga_tags;
-        use super::schema::tags::dsl::tags as tags_table;
+        #[allow(unused)]
+        use super::schema::tags::dsl::{id as id_col, tags as tags_table};
 
-        diesel::replace_into(tags_table)
-            .values(&tags)
-            .execute(conn)?;
+        // assuming that add_tags called inside transaction
+        for t in tags {
+            let q = diesel::insert_into(tags_table).values(&t);
 
-        let tags: Vec<_> = tags.iter().map(|t| t.to_join(manga_id)).collect();
-        diesel::replace_into(manga_tags)
-            .values(tags)
-            .execute(conn)?;
+            #[cfg(feature = "mysql")]
+            let q = q.on_conflict(diesel::dsl::DuplicatedKeys);
+
+            #[cfg(feature = "sqlite")]
+            let q = q.on_conflict((id_col,));
+
+            q.do_update().set(&t).execute(conn)?;
+
+            diesel::replace_into(manga_tags)
+                .values(t.to_join(manga_id))
+                .execute(conn)?;
+        }
+
         Ok(())
     }
     fn list_tags(&self, manga_id: i64) -> Result<Vec<Tag>> {
@@ -288,7 +353,17 @@ impl DB {
 }
 
 fn migrate(conn: &mut impl MigrationHarness<Backend>) -> Result<()> {
+    #[cfg(test)]
+    {
+        conn.revert_all_migrations(MIGRATIONS)
+            .map_err(|e| anyhow!("failed to revert all migrations: {e}"))?;
+    }
     conn.run_pending_migrations(MIGRATIONS)
         .map_err(|e| anyhow!("failed to run migrations: {e}"))?;
     Ok(())
+}
+
+#[cfg(all(test, feature = "mysql", feature = "test-prepare"))]
+pub fn run_migrate(db_url: &str) -> Result<()> {
+    migrate(&mut DbConnection::establish(db_url)?)
 }

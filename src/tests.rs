@@ -145,7 +145,7 @@ fn test_sync_favourites() -> Result<()> {
     let mut resp: common::FavouritesPackage = resp.into_json().unwrap();
     let timestamp = resp.timestamp.take();
 
-    assert_eq!(data, resp);
+    similar_asserts::assert_eq!(data, resp);
     assert!(timestamp < current_timestamp());
     if let Some(sent_timestamp) = sent_timestamp {
         assert!(timestamp.is_some_and(|t| t > sent_timestamp));
@@ -260,7 +260,7 @@ fn test_list_manga() -> Result<()> {
     assert_eq!(resp.len(), 1);
 
     let mut manga = data::manga();
-    assert_eq!(resp[0], manga);
+    similar_asserts::assert_eq!(resp[0], manga);
 
     let mut req = req;
     req.set_uri(uri!(routes::base::list_manga(Some(1), Some(2))));
@@ -271,7 +271,7 @@ fn test_list_manga() -> Result<()> {
     assert_eq!(resp.len(), 1);
 
     manga.id = new_manga_id;
-    assert_eq!(resp[0], manga);
+    similar_asserts::assert_eq!(resp[0], manga);
 
     Ok(())
 }
@@ -301,7 +301,7 @@ fn test_get_manga() -> Result<()> {
     assert_eq!(resp.status(), Status::Ok);
 
     let resp: common::Manga = resp.into_json().unwrap();
-    assert_eq!(resp, *manga);
+    similar_asserts::assert_eq!(resp, *manga);
 
     Ok(())
 }
@@ -387,13 +387,8 @@ mod data {
 }
 
 mod utils {
-    use std::{
-        ops::Range,
-        sync::{Mutex, OnceLock},
-    };
-
     use anyhow::Result;
-    use rocket::{local::blocking::Client, uri};
+    use rocket::{http::Status, local::blocking::Client, uri};
 
     use crate::{
         config::{Conf, ConfDB, ConfJWT},
@@ -401,15 +396,20 @@ mod utils {
         rocket, routes,
     };
 
-    const TEST_DB_COUNT: usize = 100;
-
-    static COUNTER: OnceLock<Mutex<Range<usize>>> = OnceLock::new();
-
     pub fn prepare_client() -> Result<Client> {
         prepare_client_with_conf(true)
     }
 
-    pub fn prepare_client_with_conf(allow_new_register: bool) -> Result<Client> {
+    #[cfg(feature = "sqlite")]
+    fn get_db_url() -> Result<String> {
+        use std::{
+            ops::Range,
+            sync::{Mutex, OnceLock},
+        };
+
+        const TEST_DB_COUNT: usize = 100;
+        static COUNTER: OnceLock<Mutex<Range<usize>>> = OnceLock::new();
+
         let id = COUNTER
             .get_or_init(|| Mutex::new(IntoIterator::into_iter(0..TEST_DB_COUNT)))
             .lock()
@@ -421,6 +421,28 @@ mod utils {
             Ok(()) => (),
             Err(e) if e.kind() == std::io::ErrorKind::NotFound => (),
             Err(e) => return Err(e.into()),
+        }
+        Ok(db_url)
+    }
+
+    #[cfg(feature = "mysql")]
+    fn get_db_url() -> Result<String> {
+        Ok("mysql://root@0.0.0.0:3307/kotatsu_db_test".to_string())
+    }
+
+    pub fn prepare_client_with_conf(allow_new_register: bool) -> Result<Client> {
+        let db_url = get_db_url()?;
+
+        #[cfg(all(feature = "mysql", feature = "test-prepare"))]
+        {
+            use std::sync::atomic::{AtomicBool, Ordering};
+
+            static MIGRATED: AtomicBool = AtomicBool::new(false);
+
+            if !MIGRATED.load(Ordering::Relaxed) {
+                crate::db::conn::run_migrate(&db_url)?;
+                MIGRATED.store(true, Ordering::Relaxed);
+            }
         }
 
         let config = Conf {
@@ -437,15 +459,15 @@ mod utils {
 
     /// Returns "Bearer {token}"
     pub fn make_user(client: &Client) -> String {
-        let resp: response::Auth = client
+        let resp = client
             .post(uri!(routes::base::auth))
             .json(&request::Auth {
                 email: "test@example.com".to_string(),
                 password: "test".to_string(),
             })
-            .dispatch()
-            .into_json()
-            .unwrap();
+            .dispatch();
+        assert_eq!(resp.status(), Status::Ok, "failed to make_user");
+        let resp: response::Auth = resp.into_json().unwrap();
 
         format!("Bearer {}", resp.token)
     }
