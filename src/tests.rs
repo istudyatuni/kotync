@@ -165,9 +165,33 @@ fn test_list_manga() -> Result<()> {
 }
 
 #[test]
-#[ignore = "not yet implemented"]
 fn test_get_manga() -> Result<()> {
-    todo!("get /manga/{{id}}")
+    let client = prepare_client()?;
+    let auth = make_user(&client);
+
+    let data = data::favourites_package();
+
+    let resp = client
+        .post(uri!(RESOURCE.clone(), routes::resource::save_favourites))
+        .json(&data)
+        .header(Header::new(AUTHORIZATION.as_str(), auth.clone()))
+        .dispatch();
+
+    assert_eq!(resp.status(), Status::Ok);
+
+    let manga = &data.favourites[0].manga;
+
+    let resp = client
+        .get(uri!(routes::base::get_manga(id = manga.id)))
+        .header(Header::new(AUTHORIZATION.as_str(), auth))
+        .dispatch();
+
+    assert_eq!(resp.status(), Status::Ok);
+
+    let resp: common::Manga = resp.into_json().unwrap();
+    assert_eq!(resp, *manga);
+
+    Ok(())
 }
 
 mod data {
@@ -191,40 +215,43 @@ mod data {
             }],
             favourites: vec![common::Favourite {
                 manga_id: 1,
-                manga: common::Manga {
-                    id: 1,
-                    title: "test".to_string(),
-                    alt_title: None,
-                    url: "kotatsu://test".to_string(),
-                    public_url: "http://example.com/test".to_string(),
-                    rating: 2.3,
-                    is_nsfw: 0,
-                    cover_url: "http://example.com/cover".to_string(),
-                    large_cover_url: None,
-                    tags: vec![
-                        common::MangaTag {
-                            id: 1,
-                            title: "Test".to_string(),
-                            key: "test".to_string(),
-                            source: "source".to_string(),
-                        },
-                        common::MangaTag {
-                            id: 2,
-                            title: "Test 2".to_string(),
-                            key: "test2".to_string(),
-                            source: "source".to_string(),
-                        },
-                    ],
-                    state: Some(MangaState::Finished),
-                    author: Some("Author".to_string()),
-                    source: "source".to_string(),
-                },
+                manga: manga(),
                 category_id: 1,
                 sort_key: 1,
                 created_at: now,
                 deleted_at: now,
             }],
             timestamp: Some(now),
+        }
+    }
+    pub fn manga() -> common::Manga {
+        common::Manga {
+            id: 1,
+            title: "test".to_string(),
+            alt_title: None,
+            url: "kotatsu://test".to_string(),
+            public_url: "http://example.com/test".to_string(),
+            rating: 2.3,
+            is_nsfw: 0,
+            cover_url: "http://example.com/cover".to_string(),
+            large_cover_url: None,
+            tags: vec![
+                common::MangaTag {
+                    id: 1,
+                    title: "Test".to_string(),
+                    key: "test".to_string(),
+                    source: "source".to_string(),
+                },
+                common::MangaTag {
+                    id: 2,
+                    title: "Test 2".to_string(),
+                    key: "test2".to_string(),
+                    source: "source".to_string(),
+                },
+            ],
+            state: Some(MangaState::Finished),
+            author: Some("Author".to_string()),
+            source: "source".to_string(),
         }
     }
 }

@@ -52,13 +52,18 @@ fn rocket(config: Conf) -> Result<Rocket<Build>> {
         .manage(db)
         .mount(
             "/",
-            routes![routes::base::root, routes::base::auth, routes::base::me],
+            routes![
+                routes::base::root,
+                routes::base::auth,
+                routes::base::me,
+                routes::base::get_manga,
+            ],
         )
         .mount(
             "/resource",
             routes![
                 routes::resource::save_favourites,
-                routes::resource::get_favourites
+                routes::resource::get_favourites,
             ],
         );
     Ok(rocket)

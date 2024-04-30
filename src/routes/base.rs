@@ -5,8 +5,8 @@ use crate::{
     config::Conf,
     db::conn::DB,
     jwt,
-    models::request,
     models::response,
+    models::{common, request},
     request::{ApiToken, AuthError},
 };
 
@@ -66,5 +66,16 @@ pub fn me(token: Result<ApiToken, AuthError>, db: &State<DB>) -> Response<Json<r
         id: user.id,
         email: user.email,
         nickname: user.nickname,
+    })))
+}
+
+#[get("/manga/<id>")]
+pub fn get_manga(id: i64, db: &State<DB>) -> Response<Option<Json<common::Manga>>> {
+    let manga = db.get_manga(id).map_err(|e| {
+        log::error!("failed to get manga {id}: {e}");
+        ResponseData::Status(Status::InternalServerError)
+    })?;
+    Ok(ResponseData::Body(manga.map(|(manga, tags)| {
+        Json(manga.to_api(tags.iter().map(|t| t.to_api()).collect()))
     })))
 }

@@ -149,6 +149,20 @@ impl DB {
 
         Ok(())
     }
+    pub fn get_manga(&self, manga_id: i64) -> Result<Option<(Manga, Vec<Tag>)>> {
+        use super::schema::manga;
+
+        let manga: Option<Manga> = manga::table
+            .find(manga_id)
+            .first(&mut self.pool()?)
+            .optional()?;
+        let Some(manga) = manga else {
+            return Ok(None);
+        };
+
+        let tags = self.list_tags(manga.id)?;
+        Ok(Some((manga, tags)))
+    }
     fn add_favourite(conn: &mut Conn, favourite: Favourite) -> Result<()> {
         use super::schema::favourites::dsl::favourites;
 
