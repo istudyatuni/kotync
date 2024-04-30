@@ -1,4 +1,6 @@
-create table manga
+-- if not exists for migrating old db
+
+create table if not exists manga
 (
     id              bigint       not null,
     title           varchar(84)  not null,
@@ -15,7 +17,7 @@ create table manga
     primary key (id)
 );
 
-create table tags
+create table if not exists tags
 (
     id     bigint      not null,
     title  varchar(64) not null,
@@ -24,7 +26,7 @@ create table tags
     primary key (id)
 );
 
-create table manga_tags
+create table if not exists manga_tags
 (
     manga_id bigint not null,
     tag_id   bigint not null,
@@ -36,10 +38,10 @@ create table manga_tags
             on delete cascade
 );
 
-create index tag_id
+create index if not exists tag_id
     on manga_tags (tag_id);
 
-create table users
+create table if not exists users
 (
     id                        integer primary key autoincrement not null,
     email                     varchar(120) not null,
@@ -49,7 +51,7 @@ create table users
     history_sync_timestamp    bigint   null
 );
 
-create table categories
+create table if not exists categories
 (
     id          bigint       not null,
     created_at  bigint	     not null,
@@ -66,10 +68,10 @@ create table categories
             on delete cascade
 );
 
-create index categories_id_index
+create index if not exists categories_id_index
     on categories (id);
 
-create table favourites
+create table if not exists favourites
 (
     manga_id    bigint     not null,
     category_id bigint     not null,
@@ -86,10 +88,10 @@ create table favourites
         foreign key (user_id) references users (id)
 );
 
-create index user_id
+create index if not exists user_id
     on favourites (user_id);
 
-create table history
+create table if not exists history
 (
     manga_id   bigint     not null,
     created_at bigint     not null,
@@ -109,7 +111,7 @@ create table history
             on delete cascade
 );
 
-create index manga_id
+create index if not exists manga_id
     on history (manga_id);
 
 create unique index users_email_uindex
