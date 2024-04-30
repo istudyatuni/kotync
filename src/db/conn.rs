@@ -14,8 +14,10 @@ use crate::models::{
 
 const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
 
+type ConnManager = ConnectionManager<DbConnection>;
+
 pub struct DB {
-    conn: Pool<ConnectionManager<DbConnection>>,
+    conn: Pool<ConnManager>,
 }
 
 impl DB {
@@ -24,7 +26,7 @@ impl DB {
 
         let pool = Pool::builder()
             .max_size(16)
-            .build(ConnectionManager::<DbConnection>::new(db_url))?;
+            .build(ConnectionManager::new(db_url))?;
         Ok(Self { conn: pool })
     }
     pub fn get_user_by_email(&self, email: &str) -> Result<Option<User>> {
@@ -102,7 +104,7 @@ impl DB {
                 .and_then(|u| u.favourites_sync_timestamp),
         })
     }
-    pub fn list_favourites(&self, user_id: UserID) -> Result<Vec<(Favourite, Manga)>> {
+    fn list_favourites(&self, user_id: UserID) -> Result<Vec<(Favourite, Manga)>> {
         use super::schema::favourites::dsl::user_id as user_id_col;
         use super::schema::{favourites, manga};
 
@@ -112,7 +114,7 @@ impl DB {
             .select((Favourite::as_select(), Manga::as_select()))
             .load(&mut self.pool()?)?)
     }
-    pub fn add_category(&self, category: Category) -> Result<()> {
+    fn add_category(&self, category: Category) -> Result<()> {
         use super::schema::categories::dsl::categories;
 
         diesel::replace_into(categories)
@@ -121,7 +123,7 @@ impl DB {
 
         Ok(())
     }
-    pub fn list_categories(&self, user_id: UserID) -> Result<Vec<Category>> {
+    fn list_categories(&self, user_id: UserID) -> Result<Vec<Category>> {
         use super::schema::categories::dsl::{categories, user_id as user_id_col};
 
         Ok(categories
@@ -129,7 +131,7 @@ impl DB {
             .select(Category::as_select())
             .get_results(&mut self.pool()?)?)
     }
-    pub fn add_manga(&self, manga: Manga) -> Result<()> {
+    fn add_manga(&self, manga: Manga) -> Result<()> {
         use super::schema::manga::dsl::manga as manga_table;
 
         diesel::replace_into(manga_table)
@@ -138,7 +140,7 @@ impl DB {
 
         Ok(())
     }
-    pub fn add_favourite(&self, favourite: Favourite) -> Result<()> {
+    fn add_favourite(&self, favourite: Favourite) -> Result<()> {
         use super::schema::favourites::dsl::favourites;
 
         diesel::replace_into(favourites)
@@ -147,7 +149,7 @@ impl DB {
 
         Ok(())
     }
-    pub fn add_tags(&self, tags: Vec<Tag>, manga_id: i64) -> Result<()> {
+    fn add_tags(&self, tags: Vec<Tag>, manga_id: i64) -> Result<()> {
         use super::schema::manga_tags::dsl::manga_tags;
         use super::schema::tags::dsl::tags as tags_table;
 
@@ -163,7 +165,7 @@ impl DB {
 
         Ok(())
     }
-    pub fn list_tags(&self, manga_id: i64) -> Result<Vec<Tag>> {
+    fn list_tags(&self, manga_id: i64) -> Result<Vec<Tag>> {
         use super::schema::{
             manga_tags::dsl::{manga_id as manga_id_col, manga_tags, tag_id as manga_tag_id_col},
             tags::dsl::{id as tags_id_col, tags},
