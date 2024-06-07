@@ -41,7 +41,7 @@ async fn main() -> Result<()> {
 }
 
 fn rocket(config: Conf) -> Result<Rocket<Build>> {
-    let db = DB::new(&config.db.url)?;
+    let db = DB::new(&config.db.url())?;
 
     // get_or_init because of tests
     CONFIG.get_or_init(|| config.clone());

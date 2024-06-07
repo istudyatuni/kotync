@@ -401,7 +401,7 @@ mod utils {
     }
 
     #[cfg(feature = "sqlite")]
-    fn get_db_url() -> Result<String> {
+    fn get_db_conf() -> Result<ConfDB> {
         use std::{
             ops::Range,
             sync::{Mutex, OnceLock},
@@ -422,19 +422,23 @@ mod utils {
             Err(e) if e.kind() == std::io::ErrorKind::NotFound => (),
             Err(e) => return Err(e.into()),
         }
-        Ok(db_url)
+        Ok(ConfDB { url: db_url })
     }
 
     #[cfg(feature = "mysql")]
-    fn get_db_url() -> Result<String> {
-        Ok("mysql://root@0.0.0.0:3307/kotatsu_db_test".to_string())
+    fn get_db_conf() -> Result<ConfDB> {
+        Ok(ConfDB {
+            name: "kotatsu_db_test".to_string(),
+            host: "0.0.0.0".to_string(),
+            port: 3307,
+            user: "root".to_string(),
+            password: "".to_string(),
+        })
     }
 
     pub fn prepare_client_with_conf(allow_new_register: bool) -> Result<Client> {
-        let db_url = get_db_url()?;
-
         let config = Conf {
-            db: ConfDB { url: db_url },
+            db: get_db_conf()?,
             jwt: ConfJWT {
                 secret: "test".to_string(),
                 issuer: "http://example.com".to_string(),
