@@ -12,6 +12,7 @@ use diesel::{mysql::Mysql as Backend, prelude::MysqlConnection as DbConnection};
 
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
+use crate::config::ConfDB;
 use crate::models::common::HistoryPackage;
 use crate::models::db::{History, MangaTags};
 use crate::models::{
@@ -33,10 +34,10 @@ pub struct DB {
 }
 
 impl DB {
-    pub fn new(db_url: &str) -> Result<Self> {
+    pub fn new(db_conf: ConfDB) -> Result<Self> {
         let pool = Pool::builder()
             .max_size(16)
-            .build(ConnectionManager::<DbConnection>::new(db_url))?;
+            .build(ConnectionManager::<DbConnection>::new(db_conf.url()))?;
 
         let conn = &mut pool.get()?;
         migrate(conn)?;
@@ -76,6 +77,16 @@ impl DB {
             .execute(&mut self.pool()?)?;
 
         self.get_user_by_email(email).map(|u| u.unwrap())
+    }
+    #[cfg(feature = "migrate-md5")]
+    pub fn update_user_password(&self, user_id: UserID, password: &str) -> Result<()> {
+        use super::schema::users::dsl::{id, password as password_col, users};
+
+        diesel::update(users)
+            .filter(id.eq(user_id))
+            .set(password_col.eq(password))
+            .execute(&mut self.pool()?)?;
+        Ok(())
     }
     pub fn set_favourites_synchronized(&self, user_id: UserID, time: Time) -> Result<()> {
         use super::schema::users::dsl::{favourites_sync_timestamp, id, users};

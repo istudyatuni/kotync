@@ -35,15 +35,17 @@ async fn main() -> Result<()> {
 
     let config = Conf::builder().env().file("config.toml").load()?;
     log::info!("loaded config\n{config}");
-    rocket(config)?.launch().await?;
+
+    let db = DB::new(config.db.clone())?;
+    rocket(config, db)?.launch().await?;
 
     Ok(())
 }
 
-fn rocket(config: Conf) -> Result<Rocket<Build>> {
-    let db = DB::new(&config.db.url())?;
-
-    // get_or_init because of tests
+// passing DB here because some tests needs to reuse connecion (because of
+// test_transaction)
+fn rocket(config: Conf, db: DB) -> Result<Rocket<Build>> {
+    // get_or_init to be able to pass config from tests
     CONFIG.get_or_init(|| config.clone());
 
     let rocket = rocket::build()

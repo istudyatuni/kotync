@@ -4,11 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
-default = ["original"]
+default = ["new"]
 new = ["sqlite"]
 # behave like original sync server
 original = ["migrate-md5", "mysql"]
-migrate-md5 = []
+migrate-md5 = ["dep:md-5"]
 sqlite = ["diesel/sqlite", "diesel_migrations/sqlite"]
 mysql = ["diesel/mysql", "diesel_migrations/mysql"]
 
@@ -21,6 +21,7 @@ diesel_migrations = "2.2"
 dotenvy = "0.15.7"
 jsonwebtoken = "9.3.0"
 log = { version = "0.4.21", features = ["kv"] }
+md-5 = { version = "0.10.6", optional = true }
 rocket = { version = "0.5.0", features = ["json"] }
 serde = { version = "1.0.199", features = ["derive"] }
 simplelog = "0.12.2"

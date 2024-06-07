@@ -1,26 +1,73 @@
 use anyhow::Result;
 use serde::Deserialize;
 
+use super::db::User;
+
+#[cfg(feature = "migrate-md5")]
+pub const MD5_LEN: usize = 32;
+
 #[derive(Debug, Clone, Deserialize)]
 #[cfg_attr(test, derive(serde::Serialize))]
 pub struct Auth {
     pub email: String,
     pub password: String,
+    #[cfg(feature = "migrate-md5")]
+    pub password_md5: String,
 }
 
 impl Auth {
+    #[cfg(test)]
+    pub fn new(email: &str, password: &str) -> Self {
+        Self {
+            email: email.to_owned(),
+            password: password.to_owned(),
+            #[cfg(feature = "migrate-md5")]
+            password_md5: "".to_string(),
+        }
+    }
+
     /// Validate fields and hash password
     pub fn parse(&self) -> Result<Self, &'static str> {
-        let mut s = self.clone();
-        if !matches!(s.password.len(), 2..=24) {
+        if !matches!(self.password.len(), 2..=24) {
             return Err("Password should be from 2 to 24 characters long");
         }
-        if !matches!(s.email.len(), 5..=120) || !s.email.contains('@') {
+        if !matches!(self.email.len(), 5..=120) || !self.email.contains('@') {
             return Err("Invalid email address");
         }
 
-        s.password = blake3::hash(s.password.as_bytes()).to_string();
-
-        Ok(s)
+        Ok(Self {
+            email: self.email.clone(),
+            password: blake3::hash(self.password.as_bytes()).to_string(),
+            #[cfg(feature = "migrate-md5")]
+            password_md5: to_md5(&self.password),
+        })
     }
+
+    pub fn check_password(&self, user: &User) -> Result<(), ()> {
+        if self.password == user.password {
+            return Ok(());
+        }
+        #[cfg(feature = "migrate-md5")]
+        if user.password.len() == MD5_LEN && self.password_md5 == user.password {
+            return Ok(());
+        }
+
+        Err(())
+    }
+}
+
+#[cfg(feature = "migrate-md5")]
+pub fn to_md5(input: &str) -> String {
+    use md5::Digest;
+
+    let mut hasher = md5::Md5::new();
+    hasher.update(input);
+
+    format!("{:x}", hasher.finalize())
+}
+
+#[cfg(all(test, feature = "migrate-md5"))]
+#[test]
+fn test_to_md5() {
+    assert_eq!(to_md5("test"), "098f6bcd4621d373cade4e832627b4f6");
 }

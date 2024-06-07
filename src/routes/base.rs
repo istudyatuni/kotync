@@ -5,10 +5,12 @@ use crate::{
     config::Conf,
     db::conn::DB,
     jwt,
-    models::response,
-    models::{common, request},
+    models::{common, request, response},
     request::{ApiToken, AuthError},
 };
+
+#[cfg(feature = "migrate-md5")]
+use crate::models::request::MD5_LEN;
 
 use super::{user_by_token, Response, ResponseData};
 
@@ -33,11 +35,19 @@ pub fn auth(
         ResponseData::Status(Status::InternalServerError)
     })?;
     let user = match user {
-        Some(u) if u.password != req.password => {
+        Some(u) if req.check_password(&u).is_err() => {
             return Err(ResponseData::StatusMessage(Custom(
                 Status::BadRequest,
                 "Wrong password",
             )))
+        }
+        #[cfg(feature = "migrate-md5")]
+        Some(u) if u.password.len() == MD5_LEN => {
+            match db.update_user_password(u.id, &req.password) {
+                Ok(()) => (),
+                Err(e) => log::error!("failed to update user password: {e}"),
+            }
+            u
         }
         Some(u) => u,
         None => {

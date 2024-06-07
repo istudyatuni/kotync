@@ -10,7 +10,14 @@ You can configure everything via `config.toml`. Also you can set some values via
 
 - Uses Blake3 for hashing passwords
 - Configurable via config file
-- Compatibility with MySQL database is planned (including migration of old passwords), though it's not easy. Some work started on `mysql` branch
+
+## Compatibility
+
+- Can work with MySQL database from original server (not fully tested yet). See [Building](#build-from-source)
+
+### API differences
+
+- `get /manga`: max `limit` is 1000
 
 ## Why?
 
@@ -21,14 +28,8 @@ You can configure everything via `config.toml`. Also you can set some values via
 ## Build from source
 
 ```sh
+# SQLite
 cargo b --release
-```
-
-## Run tests
-
-For SQLite just run `cargo test`, for MySQL:
-
-```sh
-just up-mysql
-just test-mysql
+# Work on MySQL database from original server
+cargo b --release --no-default-features --features=original
 ```

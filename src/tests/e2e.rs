@@ -1,4 +1,4 @@
-//! API tests
+//! End-2-end API tests
 
 use anyhow::Result;
 use rocket::{
@@ -34,10 +34,7 @@ fn test_auth_create_user() -> Result<()> {
 
     let resp = client
         .post(uri!(routes::base::auth))
-        .json(&request::Auth {
-            email: email.to_string(),
-            password: "test".to_string(),
-        })
+        .json(&request::Auth::new(email, "test"))
         .dispatch();
 
     assert_eq!(resp.status(), Status::Ok);
@@ -56,10 +53,7 @@ fn test_auth_create_user() -> Result<()> {
 
     let resp = client
         .post(uri!(routes::base::auth))
-        .json(&request::Auth {
-            email: "test2@example.com".to_string(),
-            password: "test".to_string(),
-        })
+        .json(&request::Auth::new("test2@example.com", "test"))
         .dispatch();
 
     assert_eq!(resp.status(), Status::Ok);
@@ -72,10 +66,9 @@ fn test_auth_get_token() -> Result<()> {
     let client = prepare_client()?;
     let email = "test@example.com";
 
-    let req = client.post(uri!(routes::base::auth)).json(&request::Auth {
-        email: email.to_string(),
-        password: "test".to_string(),
-    });
+    let req = client
+        .post(uri!(routes::base::auth))
+        .json(&request::Auth::new(email, "test"));
     req.clone().dispatch();
     let resp = req.dispatch();
 
@@ -102,10 +95,7 @@ fn test_auth_disabled() -> Result<()> {
 
     let resp = client
         .post(uri!(routes::base::auth))
-        .json(&request::Auth {
-            email: "test@example.com".to_string(),
-            password: "test".to_string(),
-        })
+        .json(&request::Auth::new("test@example.com", "test"))
         .dispatch();
 
     assert_eq!(resp.status(), Status::Forbidden);
@@ -124,24 +114,18 @@ fn test_auth_invalid_password() -> Result<()> {
 
     let resp = client
         .post(uri!(routes::base::auth))
-        .json(&request::Auth {
-            email: email.clone(),
-            password: "test".to_string(),
-        })
+        .json(&request::Auth::new(&email, "test"))
         .dispatch();
 
     assert_eq!(resp.status(), Status::Ok);
 
     let resp = client
         .post(uri!(routes::base::auth))
-        .json(&request::Auth {
-            email,
-            password: "adsf".to_string(),
-        })
+        .json(&request::Auth::new(&email, "asdf"))
         .dispatch();
 
     assert_eq!(resp.status(), Status::BadRequest);
-    assert_eq!(resp.into_string().unwrap(), "Wrong password".to_string());
+    assert_eq!(resp.into_string().unwrap(), "Wrong password");
 
     Ok(())
 }
@@ -213,7 +197,7 @@ fn test_sync_history() -> Result<()> {
     let mut resp: common::HistoryPackage = resp.into_json().unwrap();
     let timestamp = resp.timestamp.take();
 
-    assert_eq!(data, resp);
+    similar_asserts::assert_eq!(data, resp);
     assert!(timestamp < current_timestamp());
     if let Some(sent_timestamp) = sent_timestamp {
         assert!(timestamp.is_some_and(|t| t > sent_timestamp));
@@ -415,12 +399,13 @@ mod data {
     }
 }
 
-mod utils {
+pub mod utils {
     use anyhow::Result;
     use rocket::{http::Status, local::blocking::Client, uri};
 
     use crate::{
         config::{Conf, ConfDB, ConfJWT},
+        db::conn::DB,
         models::{request, response},
         rocket, routes,
     };
@@ -430,7 +415,7 @@ mod utils {
     }
 
     #[cfg(feature = "sqlite")]
-    fn get_db_conf() -> Result<ConfDB> {
+    pub fn get_db() -> Result<(ConfDB, DB)> {
         use std::{
             ops::Range,
             sync::{Mutex, OnceLock},
@@ -451,23 +436,39 @@ mod utils {
             Err(e) if e.kind() == std::io::ErrorKind::NotFound => (),
             Err(e) => return Err(e.into()),
         }
-        Ok(ConfDB { url: db_url })
+        let conf = ConfDB { url: db_url };
+        Ok((conf.clone(), DB::new(conf)?))
     }
 
     #[cfg(feature = "mysql")]
-    fn get_db_conf() -> Result<ConfDB> {
-        Ok(ConfDB {
+    pub fn get_db() -> Result<(ConfDB, DB)> {
+        let conf = ConfDB {
             name: "kotatsu_db_test".to_string(),
             host: "0.0.0.0".to_string(),
             port: 3307,
             user: "root".to_string(),
             password: "".to_string(),
-        })
+        };
+        Ok((conf.clone(), DB::new(conf)?))
     }
 
     pub fn prepare_client_with_conf(allow_new_register: bool) -> Result<Client> {
+        let (db_conf, db) = get_db()?;
+        prepare_client_with_conf_and_db(allow_new_register, db_conf, db)
+    }
+
+    #[cfg(feature = "migrate-md5")]
+    pub fn prepare_client_with_db(db_conf: ConfDB, db: DB) -> Result<Client> {
+        prepare_client_with_conf_and_db(true, db_conf, db)
+    }
+
+    pub fn prepare_client_with_conf_and_db(
+        allow_new_register: bool,
+        db_conf: ConfDB,
+        db: DB,
+    ) -> Result<Client> {
         let config = Conf {
-            db: get_db_conf()?,
+            db: db_conf.clone(),
             jwt: ConfJWT {
                 secret: "test".to_string(),
                 issuer: "http://example.com".to_string(),
@@ -475,17 +476,14 @@ mod utils {
             },
             allow_new_register,
         };
-        Ok(Client::untracked(rocket(config)?)?)
+        Ok(Client::untracked(rocket(config, db)?)?)
     }
 
     /// Returns "Bearer {token}"
     pub fn make_user(client: &Client) -> String {
         let resp = client
             .post(uri!(routes::base::auth))
-            .json(&request::Auth {
-                email: "test@example.com".to_string(),
-                password: "test".to_string(),
-            })
+            .json(&request::Auth::new("test@example.com", "test"))
             .dispatch();
         assert_eq!(resp.status(), Status::Ok, "failed to make_user");
         let resp: response::Auth = resp.into_json().unwrap();
