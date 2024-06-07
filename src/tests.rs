@@ -433,18 +433,6 @@ mod utils {
     pub fn prepare_client_with_conf(allow_new_register: bool) -> Result<Client> {
         let db_url = get_db_url()?;
 
-        #[cfg(all(feature = "mysql", feature = "test-prepare"))]
-        {
-            use std::sync::atomic::{AtomicBool, Ordering};
-
-            static MIGRATED: AtomicBool = AtomicBool::new(false);
-
-            if !MIGRATED.load(Ordering::Relaxed) {
-                crate::db::conn::run_migrate(&db_url)?;
-                MIGRATED.store(true, Ordering::Relaxed);
-            }
-        }
-
         let config = Conf {
             db: ConfDB { url: db_url },
             jwt: ConfJWT {

@@ -23,3 +23,12 @@ You can configure everything via `config.toml`. Also you can set some values via
 ```sh
 cargo b --release
 ```
+
+## Run tests
+
+For SQLite just run `cargo test`, for MySQL:
+
+```sh
+just up-mysql
+just test-mysql
+```

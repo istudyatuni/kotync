@@ -38,21 +38,11 @@ impl DB {
             .max_size(16)
             .build(ConnectionManager::<DbConnection>::new(db_url))?;
 
-        #[allow(unused)]
         let conn = &mut pool.get()?;
-        #[cfg(not(all(test, feature = "mysql")))]
         migrate(conn)?;
+
         #[cfg(all(test, feature = "mysql"))]
-        {
-            conn.begin_test_transaction()?;
-            diesel::sql_query("delete from history;").execute(conn)?;
-            diesel::sql_query("delete from favourites;").execute(conn)?;
-            diesel::sql_query("delete from categories;").execute(conn)?;
-            diesel::sql_query("delete from users;").execute(conn)?;
-            diesel::sql_query("delete from manga_tags;").execute(conn)?;
-            diesel::sql_query("delete from tags;").execute(conn)?;
-            diesel::sql_query("delete from manga;").execute(conn)?;
-        }
+        conn.begin_test_transaction()?;
 
         Ok(Self { conn: pool })
     }
@@ -353,17 +343,7 @@ impl DB {
 }
 
 fn migrate(conn: &mut impl MigrationHarness<Backend>) -> Result<()> {
-    #[cfg(test)]
-    {
-        conn.revert_all_migrations(MIGRATIONS)
-            .map_err(|e| anyhow!("failed to revert all migrations: {e}"))?;
-    }
     conn.run_pending_migrations(MIGRATIONS)
         .map_err(|e| anyhow!("failed to run migrations: {e}"))?;
     Ok(())
-}
-
-#[cfg(all(test, feature = "mysql", feature = "test-prepare"))]
-pub fn run_migrate(db_url: &str) -> Result<()> {
-    migrate(&mut DbConnection::establish(db_url)?)
 }

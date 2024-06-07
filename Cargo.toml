@@ -12,9 +12,6 @@ migrate-md5 = []
 sqlite = ["diesel/sqlite", "diesel_migrations/sqlite"]
 mysql = ["diesel/mysql", "diesel_migrations/mysql"]
 
-# run migrations in mysql. todo: maybe unnecessary
-test-prepare = []
-
 [dependencies]
 anyhow = "1.0.82"
 blake3 = "1.5.1"
