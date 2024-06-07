@@ -118,6 +118,35 @@ fn test_auth_disabled() -> Result<()> {
 }
 
 #[test]
+fn test_auth_invalid_password() -> Result<()> {
+    let client = prepare_client()?;
+    let email = "test@example.com".to_string();
+
+    let resp = client
+        .post(uri!(routes::base::auth))
+        .json(&request::Auth {
+            email: email.clone(),
+            password: "test".to_string(),
+        })
+        .dispatch();
+
+    assert_eq!(resp.status(), Status::Ok);
+
+    let resp = client
+        .post(uri!(routes::base::auth))
+        .json(&request::Auth {
+            email,
+            password: "adsf".to_string(),
+        })
+        .dispatch();
+
+    assert_eq!(resp.status(), Status::BadRequest);
+    assert_eq!(resp.into_string().unwrap(), "Wrong password".to_string());
+
+    Ok(())
+}
+
+#[test]
 fn test_sync_favourites() -> Result<()> {
     let client = prepare_client()?;
     let auth = make_user(&client);

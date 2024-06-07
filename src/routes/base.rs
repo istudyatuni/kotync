@@ -33,6 +33,12 @@ pub fn auth(
         ResponseData::Status(Status::InternalServerError)
     })?;
     let user = match user {
+        Some(u) if u.password != req.password => {
+            return Err(ResponseData::StatusMessage(Custom(
+                Status::BadRequest,
+                "Wrong password",
+            )))
+        }
         Some(u) => u,
         None => {
             if !config.allow_new_register {
