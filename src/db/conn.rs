@@ -23,8 +23,11 @@ use crate::models::{
 #[cfg(feature = "sqlite")]
 const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/sqlite");
 
-#[cfg(feature = "mysql")]
+#[cfg(all(feature = "mysql", not(feature = "original")))]
 const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/mysql");
+
+#[cfg(feature = "original")]
+const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/mysql-original");
 
 type ConnManager = ConnectionManager<DbConnection>;
 type Conn = PooledConnection<ConnManager>;

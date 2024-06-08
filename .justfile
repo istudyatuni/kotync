@@ -5,8 +5,8 @@
 up-mysql:
 	docker compose up -d test-db
 
-connect-mysql:
-	mariadb -h 0.0.0.0 -P 3307 -u root kotatsu_db_test
+connect-mysql port="3307" user="root" db="kotatsu_db_test":
+	mariadb -h 0.0.0.0 -P {{port}} -u {{user}} {{db}}
 
 test-mysql:
 	cargo test --no-default-features --features=original -- --test-threads 1

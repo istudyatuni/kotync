@@ -12,6 +12,7 @@ pub struct Auth {
     pub email: String,
     pub password: String,
     #[cfg(feature = "migrate-md5")]
+    #[serde(skip_deserializing)]
     pub password_md5: String,
 }
 
@@ -63,11 +64,14 @@ pub fn to_md5(input: &str) -> String {
     let mut hasher = md5::Md5::new();
     hasher.update(input);
 
-    format!("{:x}", hasher.finalize())
+    // in database md5 hashes stored not in hex form
+    String::from_utf8_lossy(hasher.finalize().as_slice()).to_string()
 }
 
 #[cfg(all(test, feature = "migrate-md5"))]
 #[test]
 fn test_to_md5() {
-    assert_eq!(to_md5("test"), "098f6bcd4621d373cade4e832627b4f6");
+    let res = to_md5("test");
+    assert_eq!(res.len(), MD5_LEN);
+    assert_eq!(res, "\t�k�F!�s��N�&'��");
 }

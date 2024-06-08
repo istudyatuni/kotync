@@ -1,7 +1,15 @@
 allow_new_register = true
 
 [db]
+# sqlite
 url = "data.db"
+
+# mysql
+name = "kotatsu_db"
+host = "localhost"
+port = 3306
+user = "YOUR_USER"
+password = "YOUR_PASSWORD"
 
 [jwt]
 secret = ""

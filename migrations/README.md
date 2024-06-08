@@ -1,1 +1,3 @@
-Folders are separated because SQLite uses `autoincrement`, and MySQL uses `auto_increment` (dies from cringe).
+- `sqlite`
+- `mysql` - different folder because SQLite uses `autoincrement`, and MySQL uses `auto_increment` (dies from cringe). But this is not supported currently
+- `mysql-original` - migrations for original MySQL DB

@@ -1,4 +1,10 @@
-use std::{path::PathBuf, str::FromStr, sync::OnceLock, time::SystemTime};
+use std::{
+    net::{IpAddr, Ipv4Addr},
+    path::PathBuf,
+    str::FromStr,
+    sync::OnceLock,
+    time::SystemTime,
+};
 
 use anyhow::{anyhow, Context, Result};
 use confique::Config;
@@ -49,6 +55,11 @@ fn rocket(config: Conf, db: DB) -> Result<Rocket<Build>> {
     CONFIG.get_or_init(|| config.clone());
 
     let rocket = rocket::build()
+        .configure(rocket::Config {
+            port: 8080,
+            address: IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)),
+            ..Default::default()
+        })
         .manage(config)
         .manage(db)
         .mount(
