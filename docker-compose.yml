@@ -1,4 +1,35 @@
 services:
+  db:
+    image: mariadb:lts
+    environment:
+      MARIADB_USER: USER
+      MARIADB_PASSWORD: PASSWORD
+      MARIADB_DATABASE: kotatsu_db
+      MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: true
+    volumes:
+      - db_data:/var/lib/mariadb
+      # - /path/to/data:/var/lib/mariadb
+    ports:
+      - "3306:3306"
+
+  server:
+    image: kotync:mysql
+    depends_on:
+      - db
+    links:
+      - db
+    environment:
+      DATABASE_HOST: db
+      DATABASE_PORT: 3306
+      DATABASE_USER: USER
+      DATABASE_PASSWORD: PASSWORD
+      DATABASE_NAME: kotatsu_db
+      JWT_SECRET: SECRET
+      ALLOW_NEW_REGISTER: true
+      # RUST_LOG: info
+    ports:
+      - 8082:8080
+
   test-db:
     image: mariadb:lts
     environment:
@@ -10,17 +41,6 @@ services:
       - db_data:/var/lib/mariadb
     ports:
       - "3307:3306"
-  db:
-    image: mariadb:lts
-    environment:
-      MARIADB_USER: user
-      MARIADB_PASSWORD: password
-      MARIADB_DATABASE: kotatsu_db
-      MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: true
-    volumes:
-      - db_data:/var/lib/mariadb
-    ports:
-      - "3306:3306"
 
 volumes:
   db_data:

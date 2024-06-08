@@ -13,7 +13,7 @@ You can configure everything via `config.toml`. Also you can set some values via
 
 ## Compatibility
 
-- Can work with MySQL database from original server (not fully tested yet). See [Building](#build-from-source)
+- Can work with MySQL database from original server (not fully tested yet). See [Building](/docs/building.md)
 
 ### API differences
 
@@ -25,11 +25,6 @@ You can configure everything via `config.toml`. Also you can set some values via
 - To run as single-binary
 - To not use database server (SQLite is used instead)
 
-## Build from source
+## Installing
 
-```sh
-# SQLite
-cargo b --release
-# Work on MySQL database from original server
-cargo b --release --no-default-features --features=original
-```
+See [Building](/docs/building.md)
