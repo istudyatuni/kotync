@@ -1,6 +1,4 @@
--- if not exists for migrating old db
-
-create table if not exists manga
+create table manga
 (
     id              bigint       not null,
     title           varchar(84)  not null,
@@ -17,7 +15,7 @@ create table if not exists manga
     primary key (id)
 );
 
-create table if not exists tags
+create table tags
 (
     id     bigint      not null,
     title  varchar(64) not null,
@@ -26,7 +24,7 @@ create table if not exists tags
     primary key (id)
 );
 
-create table if not exists manga_tags
+create table manga_tags
 (
     manga_id bigint not null,
     tag_id   bigint not null,
@@ -41,7 +39,7 @@ create table if not exists manga_tags
 create index tag_id
     on manga_tags (tag_id);
 
-create table if not exists users
+create table users
 (
     id                        integer primary key autoincrement not null,
     email                     varchar(120) not null,
@@ -51,7 +49,7 @@ create table if not exists users
     history_sync_timestamp    bigint   null
 );
 
-create table if not exists categories
+create table categories
 (
     id          bigint       not null,
     created_at  bigint	     not null,
@@ -71,7 +69,7 @@ create table if not exists categories
 create index categories_id_index
     on categories (id);
 
-create table if not exists favourites
+create table favourites
 (
     manga_id    bigint     not null,
     category_id bigint     not null,
@@ -91,7 +89,7 @@ create table if not exists favourites
 create index user_id
     on favourites (user_id);
 
-create table if not exists history
+create table history
 (
     manga_id   bigint     not null,
     created_at bigint     not null,
