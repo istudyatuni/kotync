@@ -1,0 +1,15 @@
+meta {
+  name: get manga
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{base}}/manga/{{id}}
+  body: none
+  auth: none
+}
+
+vars:pre-request {
+  id: 1
+}

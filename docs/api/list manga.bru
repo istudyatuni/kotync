@@ -1,0 +1,16 @@
+meta {
+  name: list manga
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{base}}/manga?offset=0&limit=1
+  body: none
+  auth: none
+}
+
+query {
+  offset: 0
+  limit: 1
+}
