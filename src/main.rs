@@ -48,10 +48,10 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-// passing DB here because some tests needs to reuse connecion (because of
-// test_transaction)
+// passing these arguments here to be able to call this from tests
+//
+// some tests needs to reuse DB connecion
 fn rocket(config: Conf, db: DB) -> Result<Rocket<Build>> {
-    // get_or_init to be able to pass config from tests
     CONFIG.get_or_init(|| config.clone());
 
     let rocket = rocket::build()
