@@ -1,0 +1,25 @@
+name: Build docker:tag
+
+on:
+  push:
+    tags:
+      - 'v*.*'
+
+permissions:
+  packages: write
+
+jobs:
+  extract-tag:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.step1.outputs.tag }}
+    steps:
+      - name: extract tag
+        id: step1
+        run: echo "tag=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+  docker:
+    needs:
+      - extract-tag
+    uses: ./.github/workflows/docker-build.yaml
+    with:
+      tag: ${{ needs.extract-tag.outputs.tag }}
