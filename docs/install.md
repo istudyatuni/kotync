@@ -46,14 +46,16 @@ docker run -d -p 8081:8080 \
 
 #### Note on MySQL
 
-In case of running with docker you should allow your mysql user to connect from `172.17.0.2` (ip of server, when it connects to local MySQL from docker network). To do this, you can run (via `mysql` cli under root user):
+When running with docker (not docker compose), you should allow your mysql user to connect from `172.17.0.2`\*. To do this, you can run (via `mysql` cli under root user):
 
 ```sql
 CREATE USER 'some_user'@'172.17.0.%' IDENTIFIED BY 'some_password';
 GRANT ALL PRIVILEGES ON kotatsu_db.* TO 'some_user'@'172.17.0.%';
 ```
 
-and you can set `DATABASE_HOST=172.17.0.1`. See IP of docker network: `ip a | grep -A 3 docker`.
+\* IP of server, when it connects to local MySQL from docker network. See IP of docker network: `ip a | grep -A 3 docker`.
+
+After that, set `DATABASE_HOST=172.17.0.1`.
 
 See more details [here](https://stackoverflow.com/a/44544841).
 

@@ -4,7 +4,7 @@ Rewrite of [Kotatsu Synchronization Server](https://github.com/KotatsuApp/kotats
 
 ## Compatibility
 
-- Can work with MySQL database from original server (not fully tested yet). See [Building](/docs/building.md).
+- Can work with MySQL database from original server. See [Building](/docs/install.md).
 
 ## Differences
 
@@ -23,4 +23,4 @@ Rewrite of [Kotatsu Synchronization Server](https://github.com/KotatsuApp/kotats
 
 ## Installing
 
-See [Building](/docs/building.md).
+See [Building](/docs/install.md).
