@@ -5,15 +5,16 @@ services:
       MARIADB_USER: USER
       MARIADB_PASSWORD: PASSWORD
       MARIADB_DATABASE: kotatsu_db
+      MARIADB_ROOT_PASSWORD: ROOT_PASSWORD
     volumes:
       - /var/lib/mysql:/var/lib/mariadb
-    ports:
-      - "3306:3306"
+    expose:
+      - 3306
 
   # server with mysql
   server-original:
     image: ghcr.io/istudyatuni/kotync:dev-original
-    container_name: kotync
+    container_name: kotync-original
     depends_on:
       - db
     links:
@@ -38,7 +39,7 @@ services:
       DATABASE_URL: /app/data/data.db
       JWT_SECRET: SECRET
       ALLOW_NEW_REGISTER: true
-      RUST_LOG: info
+      # RUST_LOG: info
     ports:
       - 8081:8080
     volumes:
