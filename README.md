@@ -2,18 +2,14 @@
 
 Rewrite of [Kotatsu Synchronization Server](https://github.com/KotatsuApp/kotatsu-syncserver) in Rust.
 
-## Configuring
+## Compatibility
 
-You can configure everything via `config.toml`. Also you can set some values via `.env` or plain environment variables, see `.env.sample` for available options. Precedence of configuration: env > config.
+- Can work with MySQL database from original server (not fully tested yet). See [Building](/docs/building.md).
 
 ## Differences
 
 - Uses Blake3 for hashing passwords
 - Configurable via config file
-
-## Compatibility
-
-- Can work with MySQL database from original server (not fully tested yet). See [Building](/docs/building.md)
 
 ### API differences
 
@@ -27,4 +23,4 @@ You can configure everything via `config.toml`. Also you can set some values via
 
 ## Installing
 
-See [Building](/docs/building.md)
+See [Building](/docs/building.md).
