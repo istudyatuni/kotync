@@ -8,15 +8,15 @@ FROM rust:1.78-alpine AS builder-base
 
 FROM builder-base AS builder-new
 ENV FEATURES=new
-ENV DEPS=sqlite-static
 
 FROM builder-base AS builder-original
 ENV FEATURES=original
-ENV DEPS=mariadb-dev
 
 FROM builder-${kind} AS builder
 
-RUN apk add --no-cache musl-dev ${DEPS}
+# install even unnecessary deps for better caching
+# it doesn't help for github action, sad
+RUN apk add --no-cache musl-dev sqlite-static mariadb-dev
 
 WORKDIR /app
 COPY Cargo.toml Cargo.lock /app/

@@ -1,3 +1,15 @@
+## Installing
+
+You can use pre-built docker image:
+
+```sh
+# SQLite
+docker pull ghcr.io/istudyatuni/kotync:dev
+
+# Work on MySQL database from original server
+docker pull ghcr.io/istudyatuni/kotync:dev-original
+```
+
 ## Building
 
 ### With docker
