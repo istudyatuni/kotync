@@ -1,6 +1,26 @@
-## Installing
+## Running
 
-You can use pre-built docker image:
+### With docker-compose
+
+Download [`docker-compose.yaml`](https://github.com/istudyatuni/kotync/blob/master/docs/docker-compose.yml):
+
+```sh
+curl -L https://github.com/istudyatuni/kotync/raw/master/docs/docker-compose.yml -o docker-compose.yml
+```
+
+After that fill environment variables inside, and run:
+
+```sh
+# SQLite
+docker compose up -d server
+
+# Work on MySQL database from original server
+docker compose up -d server-original
+```
+
+### With docker
+
+Use pre-built docker image:
 
 ```sh
 # SQLite
@@ -11,7 +31,7 @@ docker run -d -p 8081:8080 \
     --restart always \
     --name kotync ghcr.io/istudyatuni/kotync:dev
 
-# Work on MySQL database from original server
+# MySQL
 docker run -d -p 8081:8080 \
     -e DATABASE_HOST=your_mysql_db_host \
     -e DATABASE_USER=your_mysql_db_user \
@@ -24,7 +44,18 @@ docker run -d -p 8081:8080 \
     --name kotync ghcr.io/istudyatuni/kotync:dev-original
 ```
 
-*todo: check if can connect to locally running mysql*
+#### Note on MySQL
+
+In case of running with docker you should allow your mysql user to connect from `172.17.0.2` (ip of server, when it connects to local MySQL from docker network). To do this, you can run (via `mysql` cli under root user):
+
+```sql
+CREATE USER 'some_user'@'172.17.0.%' IDENTIFIED BY 'some_password';
+GRANT ALL PRIVILEGES ON kotatsu_db.* TO 'some_user'@'172.17.0.%';
+```
+
+and you can set `DATABASE_HOST=172.17.0.1`. See IP of docker network: `ip a | grep -A 3 docker`.
+
+See more details [here](https://stackoverflow.com/a/44544841).
 
 ## Building
 
@@ -34,7 +65,7 @@ docker run -d -p 8081:8080 \
 # SQLite
 docker build github.com/istudyatuni/kotync.git -t kotync
 
-# Work on MySQL database from original server
+# MySQL
 docker build github.com/istudyatuni/kotync.git -t kotync:mysql --build-arg kind=original
 ```
 
@@ -46,7 +77,7 @@ Requires `sqlite` or `mysql` library installed.
 # SQLite
 cargo b --release
 
-# Work on MySQL database from original server
+# MySQL
 cargo b --release --no-default-features --features=original
 ```
 
@@ -66,16 +97,10 @@ cargo b --release --no-default-features --features=original --target=x86_64-unkn
 
 You can configure everything via `config.toml`. Also you can set some values via `.env` or plain environment variables, see `.env.sample` for available options. Precedence of configuration: env > config.
 
-## Running
+<!-- ## Running
 
-### Docker image
+### Single binary (systemd)
 
-Run previously built image:
-
-See command in [Running](#installing), and replace `ghcr.io/..` with `kotync:latest` for SQLite and with `kotync:mysql` for MySQL.
-
-<!-- ### Single binary (systemd)
-
-After building from source,  -->
+After building from source, -->
 
 <!-- You need to [build with `cross`](#with-cross) -->

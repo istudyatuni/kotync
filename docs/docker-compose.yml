@@ -1,0 +1,46 @@
+services:
+  db:
+    image: mariadb:lts
+    environment:
+      MARIADB_USER: USER
+      MARIADB_PASSWORD: PASSWORD
+      MARIADB_DATABASE: kotatsu_db
+    volumes:
+      - /var/lib/mysql:/var/lib/mariadb
+    ports:
+      - "3306:3306"
+
+  # server with mysql
+  server-original:
+    image: ghcr.io/istudyatuni/kotync:dev-original
+    container_name: kotync
+    depends_on:
+      - db
+    links:
+      - db
+    environment:
+      DATABASE_HOST: db
+      DATABASE_PORT: 3306
+      DATABASE_USER: USER
+      DATABASE_PASSWORD: PASSWORD
+      DATABASE_NAME: kotatsu_db
+      JWT_SECRET: SECRET
+      ALLOW_NEW_REGISTER: true
+      # RUST_LOG: info
+    ports:
+      - 8081:8080
+
+  # server with sqlite
+  server:
+    image: ghcr.io/istudyatuni/kotync:dev
+    container_name: kotync
+    environment:
+      DATABASE_URL: /app/data/data.db
+      JWT_SECRET: SECRET
+      ALLOW_NEW_REGISTER: true
+      RUST_LOG: info
+    ports:
+      - 8081:8080
+    volumes:
+      # change ${PWD} to directory, where you want to save data.db
+      - ${PWD}:/app/data
