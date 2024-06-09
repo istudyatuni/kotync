@@ -5,23 +5,23 @@ You can use pre-built docker image:
 ```sh
 # SQLite
 docker run -d -p 8081:8080 \
-	-e DATABASE_URL=path_to_your_sqlite_db \
-	-e JWT_SECRET=your_secret \
-	-e ALLOW_NEW_REGISTER=true \
-	--restart always \
-	--name kotync ghcr.io/istudyatuni/kotync:dev
+    -e DATABASE_URL=path_to_your_sqlite_db \
+    -e JWT_SECRET=your_secret \
+    -e ALLOW_NEW_REGISTER=true \
+    --restart always \
+    --name kotync ghcr.io/istudyatuni/kotync:dev
 
 # Work on MySQL database from original server
 docker run -d -p 8081:8080 \
-	-e DATABASE_HOST=your_mysql_db_host \
-	-e DATABASE_USER=your_mysql_db_user \
-	-e DATABASE_PASSWORD=your_mysql_db_password \
-	-e DATABASE_NAME=your_mysql_db_name \
- 	-e DATABASE_PORT=your_mysql_db_port \
-	-e JWT_SECRET=your_secret \
-	-e ALLOW_NEW_REGISTER=true \
-	--restart always \
-	--name kotync ghcr.io/istudyatuni/kotync:dev-original
+    -e DATABASE_HOST=your_mysql_db_host \
+    -e DATABASE_USER=your_mysql_db_user \
+    -e DATABASE_PASSWORD=your_mysql_db_password \
+    -e DATABASE_NAME=your_mysql_db_name \
+    -e DATABASE_PORT=your_mysql_db_port \
+    -e JWT_SECRET=your_secret \
+    -e ALLOW_NEW_REGISTER=true \
+    --restart always \
+    --name kotync ghcr.io/istudyatuni/kotync:dev-original
 ```
 
 *todo: check if can connect to locally running mysql*

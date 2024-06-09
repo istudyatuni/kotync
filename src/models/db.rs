@@ -15,8 +15,8 @@ use super::common::{
 
 #[derive(Queryable, Selectable, Insertable, Identifiable, AsChangeset, Debug)]
 #[diesel(
-	table_name = crate::db::schema::categories,
-	check_for_backend(Backend),
+    table_name = crate::db::schema::categories,
+    check_for_backend(Backend),
     primary_key(id, user_id)
 )]
 pub struct Category {
@@ -48,8 +48,8 @@ impl Category {
 
 #[derive(Queryable, Selectable, Insertable, Debug)]
 #[diesel(
-	table_name = crate::db::schema::favourites,
-	check_for_backend(Backend)
+    table_name = crate::db::schema::favourites,
+    check_for_backend(Backend)
 )]
 pub struct Favourite {
     pub manga_id: i64,
@@ -75,8 +75,8 @@ impl Favourite {
 
 #[derive(Queryable, Selectable, Insertable, AsChangeset, Debug)]
 #[diesel(
-	table_name = crate::db::schema::history,
-	check_for_backend(Backend)
+    table_name = crate::db::schema::history,
+    check_for_backend(Backend)
 )]
 pub struct History {
     pub manga_id: i64,
@@ -110,8 +110,8 @@ impl History {
 
 #[derive(Queryable, Selectable, Insertable, Identifiable, AsChangeset, Debug)]
 #[diesel(
-	table_name = crate::db::schema::manga,
-	check_for_backend(Backend)
+    table_name = crate::db::schema::manga,
+    check_for_backend(Backend)
 )]
 pub struct Manga {
     pub id: i64,
@@ -164,8 +164,8 @@ pub struct MangaTags {
 
 #[derive(Queryable, Selectable, Insertable, Identifiable, AsChangeset, Debug)]
 #[diesel(
-	table_name = crate::db::schema::tags,
-	check_for_backend(Backend)
+    table_name = crate::db::schema::tags,
+    check_for_backend(Backend)
 )]
 pub struct Tag {
     pub id: i64,
@@ -193,8 +193,8 @@ impl Tag {
 
 #[derive(Queryable, Selectable, Identifiable, Debug, Default)]
 #[diesel(
-	table_name = crate::db::schema::users,
-	check_for_backend(Backend)
+    table_name = crate::db::schema::users,
+    check_for_backend(Backend)
 )]
 pub struct User {
     pub id: UserID,
