@@ -87,7 +87,7 @@ fn rocket(config: Conf, db: DB) -> Result<Rocket<Build>> {
             log::error!("ADMIN_API should start with /");
             return Err(anyhow!("invalid env, exiting"));
         }
-        rocket = rocket.mount(admin, routes![routes::admin::stats]);
+        rocket = rocket.mount(admin, routes![routes::admin::stats, routes::admin::info]);
     }
 
     Ok(rocket)

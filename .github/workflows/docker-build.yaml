@@ -30,6 +30,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build docker
         run: |
+          echo $IMAGE_TAG > .version
           docker build . --tag $IMAGE_NAME:$IMAGE_TAG
           docker build . --tag $IMAGE_NAME:$ORIGINAL_TAG --build-arg kind=original
           docker build . --tag $IMAGE_NAME:$MYSQL_TAG --build-arg kind=mysql

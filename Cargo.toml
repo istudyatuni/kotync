@@ -1,6 +1,6 @@
 [package]
 name = "kotync"
-version = "0.1.0"
+version = "0.0.0"
 edition = "2021"
 # also update in Dockerfile and .github/workflows
 rust-version = "1.78"
