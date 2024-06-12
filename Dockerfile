@@ -32,8 +32,7 @@ ENV BUILD_ARGS="--release --target=x86_64-unknown-linux-musl --no-default-featur
 
 RUN cargo b ${BUILD_ARGS}
 
-COPY src /app/src
-COPY migrations /app/migrations
+COPY . /app
 
 RUN cargo b ${BUILD_ARGS}
 
