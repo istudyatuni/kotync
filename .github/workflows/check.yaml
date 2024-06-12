@@ -21,7 +21,7 @@ jobs:
           toolchain: 1.78
           components: clippy, rustfmt
       - uses: Swatinem/rust-cache@v2
-      - run: cargo clippy --no-default-features --features=new
-      - run: cargo clippy --no-default-features --features=original
-      - run: cargo fmt --check
-      - run: cargo test --no-default-features --features=new
+      - uses: extractions/setup-just@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: just ci

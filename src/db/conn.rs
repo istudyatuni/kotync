@@ -27,8 +27,11 @@ const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/sqlite");
 #[cfg(all(feature = "mysql", not(feature = "original")))]
 const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/mysql");
 
-#[cfg(feature = "original")]
+#[cfg(all(feature = "original", not(test)))]
 const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/mysql-original");
+
+#[cfg(all(feature = "original", test))]
+const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/mysql");
 
 type ConnManager = ConnectionManager<DbConnection>;
 type Conn = PooledConnection<ConnManager>;
