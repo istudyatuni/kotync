@@ -1,4 +1,4 @@
-# new, original
+# new, original, mysql
 ARG kind=new
 
 # ----- build ----- #
@@ -11,6 +11,9 @@ ENV FEATURES=new
 
 FROM builder-base AS builder-original
 ENV FEATURES=original
+
+FROM builder-base AS builder-mysql
+ENV FEATURES=mysql
 
 FROM builder-${kind} AS builder
 
@@ -44,11 +47,14 @@ ENV DEPS=sqlite-libs
 FROM run-base AS run-original
 ENV DEPS=mariadb-connector-c
 
-FROM run-${kind}
+FROM run-base AS run-mysql
+ENV DEPS=mariadb-connector-c
+
+FROM run-${kind} AS run
 RUN apk add --no-cache libgcc ${DEPS}
 
+FROM run
+EXPOSE 8080:8080
 WORKDIR /app
 COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/kotync .
-
-EXPOSE 8080:8080
 ENTRYPOINT ["/app/kotync"]

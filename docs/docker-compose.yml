@@ -7,12 +7,18 @@ services:
       MARIADB_DATABASE: kotatsu_db
       MARIADB_ROOT_PASSWORD: ROOT_PASSWORD
     volumes:
-      - /var/lib/mysql:/var/lib/mariadb
+      - /var/lib/mysql:/var/lib/mysql
+      # socket
+      - /run/mysqld:/run/mysqld
     expose:
       - 3306
+    networks:
+      internal:
+        ipv4_address: 172.20.0.2
 
   # server with mysql
-  server-original:
+  server-mysql:
+    # if you do not need to work with original database, change "-original" to "-mysql"
     image: ghcr.io/istudyatuni/kotync:dev-original
     container_name: kotync-original
     depends_on:
@@ -30,6 +36,11 @@ services:
       # RUST_LOG: info
     ports:
       - 8081:8080
+    restart: always
+    networks:
+      internal:
+        # to be able to tell mariadb IP of client
+        ipv4_address: 172.20.0.3
 
   # server with sqlite
   server:
@@ -45,3 +56,12 @@ services:
     volumes:
       # change ${PWD} to directory, where you want to save data.db
       - ${PWD}:/app/data
+    restart: always
+
+# https://stackoverflow.com/a/39498534
+networks:
+  internal:
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+          gateway: 172.20.0.1

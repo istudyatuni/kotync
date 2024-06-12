@@ -15,7 +15,7 @@ After that fill environment variables inside, and run:
 docker compose up -d server
 
 # Work on MySQL database from original server
-docker compose up -d server-original
+docker compose up -d server-mysql
 ```
 
 ### With docker
@@ -44,9 +44,11 @@ docker run -d -p 8081:8080 \
     --name kotync ghcr.io/istudyatuni/kotync:dev-original
 ```
 
-#### Note on MySQL
+### Note on MySQL
 
-When running with docker (not docker compose), you should allow your mysql user to connect from `172.17.0.2`\*. To do this, you can run (via `mysql` cli under root user):
+*_When using `docker`_*
+
+You should allow your mysql user to connect from `172.17.0.2`\*. To do this, connect to mysql under root user (via `sudo mysql`), and execute:
 
 ```sql
 CREATE USER 'some_user'@'172.17.0.%' IDENTIFIED BY 'some_password';
@@ -56,6 +58,15 @@ GRANT ALL PRIVILEGES ON kotatsu_db.* TO 'some_user'@'172.17.0.%';
 \* IP of server, when it connects to local MySQL from docker network. See IP of docker network: `ip a | grep -A 3 docker`.
 
 After that, set `DATABASE_HOST=172.17.0.1`.
+
+*_When using `docker compose`_*
+
+MySQL user is created on startup with all permissions, if you want to set more granular permissions, you should allow user to connect from within docker network. To do this, first run `docker compose up -d db`, then connect to mariadb under root user (via `sudo mysql` or `sudo mariadb`), and execute:
+
+```sql
+CREATE USER 'some_user'@'172.20.0.3' IDENTIFIED BY 'some_password';
+GRANT ALL PRIVILEGES ON kotatsu_db.* TO 'some_user'@'172.20.0.3';
+```
 
 See more details [here](https://stackoverflow.com/a/44544841).
 
