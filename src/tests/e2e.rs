@@ -8,12 +8,13 @@ use rocket::{
 
 use crate::{
     current_timestamp,
-    models::{common, request, response},
+    models::{admin::DBStats, common, request, response},
     routes,
 };
 
 use utils::*;
 
+static ADMIN: Origin<'static> = uri!("/admin");
 static RESOURCE: Origin<'static> = uri!("/resource");
 
 #[test]
@@ -319,6 +320,49 @@ fn test_get_manga() -> Result<()> {
     Ok(())
 }
 
+#[test]
+fn test_empty_stats() -> Result<()> {
+    let client = prepare_client()?;
+
+    let resp = client
+        .get(uri!(ADMIN.clone(), routes::admin::stats))
+        .dispatch();
+    assert_eq!(resp.status(), Status::Ok);
+    let resp: DBStats = resp.into_json().unwrap();
+
+    assert_eq!(resp.users_count, 0);
+    assert_eq!(resp.manga_count, 0);
+
+    Ok(())
+}
+
+#[test]
+fn test_stats() -> Result<()> {
+    let client = prepare_client()?;
+    let auth = make_user(&client);
+
+    let data = data::favourites_package();
+
+    let resp = client
+        .post(uri!(RESOURCE.clone(), routes::resource::save_favourites))
+        .json(&data)
+        .header(Header::new(AUTHORIZATION.as_str(), auth))
+        .dispatch();
+
+    assert_eq!(resp.status(), Status::Ok);
+
+    let resp = client
+        .get(uri!(ADMIN.clone(), routes::admin::stats))
+        .dispatch();
+    assert_eq!(resp.status(), Status::Ok);
+    let resp: DBStats = resp.into_json().unwrap();
+
+    assert_eq!(resp.users_count, 1);
+    assert_eq!(resp.manga_count, 1);
+
+    Ok(())
+}
+
 mod data {
     use crate::{
         current_timestamp,
@@ -475,6 +519,7 @@ pub mod utils {
                 audience: "http://example.com/resource".to_string(),
             },
             allow_new_register,
+            admin_api: Some("/admin".to_string()),
         };
         Ok(Client::untracked(rocket(config, db)?)?)
     }

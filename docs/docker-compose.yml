@@ -33,6 +33,7 @@ services:
       DATABASE_NAME: kotatsu_db
       JWT_SECRET: SECRET
       ALLOW_NEW_REGISTER: true
+      # ADMIN_API: /ADMIN
       # RUST_LOG: info
     ports:
       - 8081:8080
@@ -50,6 +51,7 @@ services:
       DATABASE_URL: /app/data/data.db
       JWT_SECRET: SECRET
       ALLOW_NEW_REGISTER: true
+      # ADMIN_API: /ADMIN
       # RUST_LOG: info
     ports:
       - 8081:8080

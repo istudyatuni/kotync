@@ -54,13 +54,13 @@ async fn main() -> Result<()> {
 fn rocket(config: Conf, db: DB) -> Result<Rocket<Build>> {
     CONFIG.get_or_init(|| config.clone());
 
-    let rocket = rocket::build()
+    let mut rocket = rocket::build()
         .configure(rocket::Config {
             port: 8080,
             address: IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)),
             ..Default::default()
         })
-        .manage(config)
+        .manage(config.clone())
         .manage(db)
         .mount(
             "/",
@@ -81,6 +81,15 @@ fn rocket(config: Conf, db: DB) -> Result<Rocket<Build>> {
                 routes::resource::get_history,
             ],
         );
+
+    if let Some(admin) = &config.admin_api {
+        if !admin.starts_with('/') {
+            log::error!("ADMIN_API should start with /");
+            return Err(anyhow!("invalid env, exiting"));
+        }
+        rocket = rocket.mount(admin, routes![routes::admin::stats]);
+    }
+
     Ok(rocket)
 }
 

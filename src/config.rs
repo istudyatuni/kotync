@@ -8,6 +8,8 @@ pub struct Conf {
     pub jwt: ConfJWT,
     #[config(env = "ALLOW_NEW_REGISTER", default = true)]
     pub allow_new_register: bool,
+    #[config(env = "ADMIN_API")]
+    pub admin_api: Option<String>,
 }
 
 #[derive(Debug, Clone, confique::Config)]
@@ -78,6 +80,12 @@ impl Display for Conf {
         f.pad(&self.jwt.audience)?;
         f.pad("\n  allow_new_register: ")?;
         self.allow_new_register.fmt(f)?;
+        f.pad("\n  admin_api: ")?;
+        if let Some(admin_api) = &self.admin_api {
+            f.pad(admin_api)?;
+        } else {
+            f.pad("[empty]")?;
+        }
 
         Ok(())
     }

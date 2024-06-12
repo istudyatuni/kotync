@@ -1,5 +1,6 @@
 use unicode_segmentation::UnicodeSegmentation;
 
+pub mod admin;
 pub mod common;
 pub mod db;
 pub mod request;

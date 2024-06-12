@@ -6,6 +6,7 @@ use crate::{
     request::{ApiToken, AuthError},
 };
 
+pub mod admin;
 pub mod base;
 pub mod resource;
 

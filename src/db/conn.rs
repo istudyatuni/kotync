@@ -13,6 +13,7 @@ use diesel::{mysql::Mysql as Backend, prelude::MysqlConnection as DbConnection};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
 use crate::config::ConfDB;
+use crate::models::admin::DBStats;
 use crate::models::common::HistoryPackage;
 use crate::models::db::{History, MangaTags};
 use crate::models::{
@@ -353,6 +354,22 @@ impl DB {
     }
     fn pool(&self) -> Result<Conn> {
         self.conn.get().context("cannot get db.pool")
+    }
+}
+
+// admin
+impl DB {
+    pub fn stats(&self) -> Result<DBStats> {
+        use super::schema::manga::table as manga;
+        use super::schema::users::table as users;
+
+        let conn = &mut self.pool()?;
+        let users_count: i64 = users.count().get_result(conn)?;
+        let manga_count: i64 = manga.count().get_result(conn)?;
+        Ok(DBStats {
+            users_count: users_count as u32,
+            manga_count: manga_count as u64,
+        })
     }
 }
 

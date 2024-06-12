@@ -46,7 +46,7 @@ docker run -d -p 8081:8080 \
 
 ### Note on MySQL
 
-*_When using `docker`_*
+***When using `docker`***
 
 You should allow your mysql user to connect from `172.17.0.2`\*. To do this, connect to mysql under root user (via `sudo mysql`), and execute:
 
@@ -59,7 +59,7 @@ GRANT ALL PRIVILEGES ON kotatsu_db.* TO 'some_user'@'172.17.0.%';
 
 After that, set `DATABASE_HOST=172.17.0.1`.
 
-*_When using `docker compose`_*
+***When using `docker compose`***
 
 MySQL user is created on startup with all permissions, if you want to set more granular permissions, you should allow user to connect from within docker network. To do this, first run `docker compose up -d db`, then connect to mariadb under root user (via `sudo mysql` or `sudo mariadb`), and execute:
 
