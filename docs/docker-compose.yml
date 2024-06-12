@@ -19,7 +19,7 @@ services:
   # server with mysql
   server-mysql:
     # if you do not need to work with original database, change "-original" to "-mysql"
-    image: ghcr.io/istudyatuni/kotync:dev-original
+    image: ghcr.io/istudyatuni/kotync:VERSION-original
     container_name: kotync-original
     depends_on:
       - db
@@ -45,7 +45,7 @@ services:
 
   # server with sqlite
   server:
-    image: ghcr.io/istudyatuni/kotync:dev
+    image: ghcr.io/istudyatuni/kotync:VERSION
     container_name: kotync
     environment:
       DATABASE_URL: /app/data/data.db

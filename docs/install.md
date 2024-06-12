@@ -8,7 +8,13 @@ Download [`docker-compose.yaml`](https://github.com/istudyatuni/kotync/blob/mast
 curl -L https://github.com/istudyatuni/kotync/raw/master/docs/docker-compose.yml -o docker-compose.yml
 ```
 
-After that fill environment variables inside, and run:
+After that fill environment variables inside. Some notes:
+
+- VERSION can be `dev`, or the version itself, like `0.1.0`. See all tags [here](https://github.com/istudyatuni/kotync/pkgs/container/kotync).
+- ADMIN_API is optional path prefix to enable some additiional features, like statistics. URL will look like `http://IP/ADMIN_API/stats`
+- RUST_LOG - set level of logging
+
+Then run:
 
 ```sh
 # SQLite
@@ -29,7 +35,7 @@ docker run -d -p 8081:8080 \
     -e JWT_SECRET=your_secret \
     -e ALLOW_NEW_REGISTER=true \
     --restart always \
-    --name kotync ghcr.io/istudyatuni/kotync:dev
+    --name kotync ghcr.io/istudyatuni/kotync:VERSION
 
 # MySQL
 docker run -d -p 8081:8080 \
@@ -41,8 +47,12 @@ docker run -d -p 8081:8080 \
     -e JWT_SECRET=your_secret \
     -e ALLOW_NEW_REGISTER=true \
     --restart always \
-    --name kotync ghcr.io/istudyatuni/kotync:dev-original
+    --name kotync ghcr.io/istudyatuni/kotync:VERSION-original
 ```
+
+`VERSION` - see [above](#with-docker-compose).
+
+See up-to-date list of environment variables in [`.env.sample`](./.env.sample).
 
 ### Note on MySQL
 
