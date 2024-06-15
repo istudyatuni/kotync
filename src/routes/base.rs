@@ -51,7 +51,7 @@ pub fn auth(
         }
         Some(u) => u,
         None => {
-            if !config.allow_new_register {
+            if !config.server.allow_new_register {
                 return Err(ResponseData::StatusMessage(Custom(
                     Status::Forbidden,
                     "registration of new users is disabled",

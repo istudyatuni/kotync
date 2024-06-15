@@ -2,16 +2,22 @@ use std::fmt::Display;
 
 #[derive(Debug, Clone, confique::Config)]
 pub struct Conf {
-    #[config(env = "PORT", default = 8080)]
-    pub port: u16,
+    #[config(nested)]
+    pub server: ConfServer,
     #[config(nested)]
     pub db: ConfDB,
     #[config(nested)]
     pub jwt: ConfJWT,
-    #[config(env = "ALLOW_NEW_REGISTER", default = true)]
-    pub allow_new_register: bool,
+}
+
+#[derive(Debug, Clone, confique::Config)]
+pub struct ConfServer {
+    #[config(env = "PORT", default = 8080)]
+    pub port: u16,
     #[config(env = "ADMIN_API")]
     pub admin_api: Option<String>,
+    #[config(env = "ALLOW_NEW_REGISTER", default = true)]
+    pub allow_new_register: bool,
 }
 
 #[derive(Debug, Clone, confique::Config)]
@@ -67,9 +73,22 @@ impl ConfDB {
 
 impl Display for Conf {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.pad("Config")?;
+        f.pad("Config\n  ")?;
+
+        f.pad("server.port: ")?;
+        self.server.port.fmt(f)?;
+        f.pad("\n  server.admin_api: ")?;
+        if let Some(admin_api) = &self.server.admin_api {
+            f.pad(admin_api)?;
+        } else {
+            f.pad("[empty]")?;
+        }
+        f.pad("\n  server.allow_new_register: ")?;
+        self.server.allow_new_register.fmt(f)?;
+
         f.pad("\n  db.url: ")?;
         f.pad(&self.db.url())?;
+
         f.pad("\n  jwt.secret: ")?;
         if self.jwt.secret.is_empty() {
             f.pad("[empty]")?;
@@ -80,14 +99,6 @@ impl Display for Conf {
         f.pad(&self.jwt.issuer)?;
         f.pad("\n  jwt.audience: ")?;
         f.pad(&self.jwt.audience)?;
-        f.pad("\n  allow_new_register: ")?;
-        self.allow_new_register.fmt(f)?;
-        f.pad("\n  admin_api: ")?;
-        if let Some(admin_api) = &self.admin_api {
-            f.pad(admin_api)?;
-        } else {
-            f.pad("[empty]")?;
-        }
 
         Ok(())
     }

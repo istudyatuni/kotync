@@ -13,9 +13,11 @@ remake-mysql: && up-mysql
 	docker compose down test-db
 	docker volume rm kotync_db_data
 
+[private]
 test-new:
 	cargo test --no-default-features --features=new
 
+[private]
 test-mysql:
 	cargo test --no-default-features --features=original -- --test-threads 1
 	cargo test --no-default-features --features=mysql -- --test-threads 1

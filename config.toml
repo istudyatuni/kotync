@@ -1,3 +1,8 @@
+[server]
+# do not use when running server with docker
+port = 8080
+# optional
+admin_api = "/admin"
 allow_new_register = true
 
 [db]

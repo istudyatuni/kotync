@@ -59,7 +59,7 @@ fn rocket(config: Conf, db: DB) -> Result<Rocket<Build>> {
 
     let mut rocket = rocket::build()
         .configure(rocket::Config {
-            port: config.port,
+            port: config.server.port,
             address: IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)),
             limits: Limits::default().limit("json", 4.mebibytes()),
             ..Default::default()
@@ -86,7 +86,7 @@ fn rocket(config: Conf, db: DB) -> Result<Rocket<Build>> {
             ],
         );
 
-    if let Some(admin) = &config.admin_api {
+    if let Some(admin) = &config.server.admin_api {
         if !admin.starts_with('/') {
             log::error!("ADMIN_API should start with /");
             return Err(anyhow!("invalid env, exiting"));

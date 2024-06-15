@@ -448,7 +448,7 @@ pub mod utils {
     use rocket::{http::Status, local::blocking::Client, uri};
 
     use crate::{
-        config::{Conf, ConfDB, ConfJWT},
+        config::{Conf, ConfDB, ConfJWT, ConfServer},
         db::conn::DB,
         models::{request, response},
         rocket, routes,
@@ -512,15 +512,17 @@ pub mod utils {
         db: DB,
     ) -> Result<Client> {
         let config = Conf {
-            port: 8080,
+            server: ConfServer {
+                port: 8080,
+                admin_api: Some("/admin".to_string()),
+                allow_new_register,
+            },
             db: db_conf.clone(),
             jwt: ConfJWT {
                 secret: "test".to_string(),
                 issuer: "http://example.com".to_string(),
                 audience: "http://example.com/resource".to_string(),
             },
-            allow_new_register,
-            admin_api: Some("/admin".to_string()),
         };
         Ok(Client::untracked(rocket(config, db)?)?)
     }
