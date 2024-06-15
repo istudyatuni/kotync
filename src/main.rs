@@ -59,7 +59,7 @@ fn rocket(config: Conf, db: DB) -> Result<Rocket<Build>> {
 
     let mut rocket = rocket::build()
         .configure(rocket::Config {
-            port: 8080,
+            port: config.port,
             address: IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)),
             limits: Limits::default().limit("json", 4.mebibytes()),
             ..Default::default()

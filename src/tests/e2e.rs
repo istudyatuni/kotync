@@ -512,6 +512,7 @@ pub mod utils {
         db: DB,
     ) -> Result<Client> {
         let config = Conf {
+            port: 8080,
             db: db_conf.clone(),
             jwt: ConfJWT {
                 secret: "test".to_string(),

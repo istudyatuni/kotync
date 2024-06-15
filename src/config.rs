@@ -2,6 +2,8 @@ use std::fmt::Display;
 
 #[derive(Debug, Clone, confique::Config)]
 pub struct Conf {
+    #[config(env = "PORT", default = 8080)]
+    pub port: u16,
     #[config(nested)]
     pub db: ConfDB,
     #[config(nested)]
