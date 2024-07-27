@@ -1,5 +1,3 @@
-#![cfg_attr(test, allow(unused))]
-
 use anyhow::{anyhow, Context, Result};
 use diesel::prelude::*;
 use diesel::r2d2::{ConnectionManager, Pool, PooledConnection};
@@ -24,14 +22,14 @@ use crate::models::{
 #[cfg(feature = "sqlite")]
 const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/sqlite");
 
-#[cfg(all(feature = "mysql", not(feature = "original")))]
+#[cfg(any(
+    all(feature = "mysql", not(feature = "original")),
+    all(feature = "original", test),
+))]
 const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/mysql");
 
 #[cfg(all(feature = "original", not(test)))]
 const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/mysql-original");
-
-#[cfg(all(feature = "original", test))]
-const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/mysql");
 
 type ConnManager = ConnectionManager<DbConnection>;
 type Conn = PooledConnection<ConnManager>;

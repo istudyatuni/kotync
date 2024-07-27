@@ -3,5 +3,6 @@
 pkgs.mkShell {
     buildInputs = with pkgs; [
       sqlite
+      libmysqlclient.dev
     ];
 }
