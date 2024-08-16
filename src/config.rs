@@ -32,7 +32,7 @@ pub struct ConfServerLimits {
 
 #[derive(Debug, Clone, confique::Config)]
 pub struct ConfJWT {
-    #[config(env = "JWT_SECRET", default = "")]
+    #[config(env = "JWT_SECRET")]
     pub secret: String,
     #[config(default = "http://0.0.0.0:8080/")]
     pub issuer: String,
