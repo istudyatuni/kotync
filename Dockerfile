@@ -4,7 +4,7 @@ ARG kind=new
 # ----- build ----- #
 
 # https://stackoverflow.com/a/60820156
-FROM rust:1.78-alpine AS builder-base
+FROM rust:1.80-alpine AS builder-base
 
 FROM builder-base AS builder-new
 ENV FEATURES=new
