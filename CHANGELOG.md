@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.2
 
 - Configure port (env `PORT`)
 - Configure limit for JSON requests payloads (env `LIMITS_JSON`)
