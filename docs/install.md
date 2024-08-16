@@ -1,6 +1,13 @@
 ## Running
 
-See description of configuration variables in [config.md](config.md)
+Some notes:
+
+1. See description of configuration variables in [config.md](config.md)
+2. VERSION can be `dev`, or the version itself, like `0.1.0`. See all tags [here](https://github.com/istudyatuni/kotync/pkgs/container/kotync)
+3. Version prefixes:
+    - Without prefix: server with SQLite as storage
+    - `VERSION-mysql`: server with MySQL
+    - `VERSION-original`: server with MySQL from original server
 
 ### With docker-compose
 
@@ -10,15 +17,13 @@ Download [`docker-compose.yaml`](https://github.com/istudyatuni/kotync/blob/mast
 curl -L https://github.com/istudyatuni/kotync/raw/master/docs/docker-compose.yml -o docker-compose.yml
 ```
 
-After that fill environment variables inside. Note: VERSION can be `dev`, or the version itself, like `0.1.0`. See all tags [here](https://github.com/istudyatuni/kotync/pkgs/container/kotync).
-
-Then run:
+After that fill environment variables inside. Then run:
 
 ```sh
 # SQLite
 docker compose up -d server
 
-# Work on MySQL database from original server
+# MySQL (original or mysql is set in docker-compose)
 docker compose up -d server-mysql
 ```
 
@@ -47,8 +52,6 @@ docker run -d -p 8081:8080 \
     --restart always \
     --name kotync ghcr.io/istudyatuni/kotync:VERSION-original
 ```
-
-`VERSION` - see [above](#with-docker-compose).
 
 ### Note on MySQL
 
@@ -84,8 +87,8 @@ See more details [here](https://stackoverflow.com/a/44544841).
 # SQLite
 docker build github.com/istudyatuni/kotync.git -t kotync
 
-# MySQL
-docker build github.com/istudyatuni/kotync.git -t kotync:mysql --build-arg kind=original
+# MySQL (to build for original DB change mysql to original)
+docker build github.com/istudyatuni/kotync.git -t kotync:mysql --build-arg kind=mysql
 ```
 
 ### From source
@@ -96,8 +99,8 @@ Requires `sqlite` or `mysql` library installed.
 # SQLite
 cargo b --release
 
-# MySQL
-cargo b --release --no-default-features --features=original
+# MySQL (to build for original DB change mysql to original)
+cargo b --release --no-default-features --features=mysql
 ```
 
 <!-- #### Cross-compile
@@ -109,7 +112,7 @@ You need [cross](https://github.com/cross-rs/cross?tab=readme-ov-file#installati
 cross b --release --target=x86_64-unknown-linux-musl
 
 # MySQL
-cargo b --release --no-default-features --features=original --target=x86_64-unknown-linux-musl
+cargo b --release --no-default-features --features=mysql --target=x86_64-unknown-linux-musl
 ``` -->
 
 <!-- ## Running
