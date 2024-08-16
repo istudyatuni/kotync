@@ -2,6 +2,8 @@ use std::fmt::Display;
 
 use rocket::data::ByteUnit;
 
+// When add new values here also update docs/docker-compose.yaml and
+// docs/config.md
 #[derive(Debug, Clone, confique::Config)]
 pub struct Conf {
     #[config(nested)]
