@@ -9,10 +9,7 @@ use std::{
 use anyhow::{anyhow, Context, Result};
 use confique::Config;
 use log::LevelFilter;
-use rocket::{
-    data::{Limits, ToByteUnit},
-    routes, Build, Rocket,
-};
+use rocket::{data::Limits, routes, Build, Rocket};
 use simplelog::{ColorChoice, ConfigBuilder, TermLogger, TerminalMode};
 
 use config::Conf;
@@ -61,7 +58,7 @@ fn rocket(config: Conf, db: DB) -> Result<Rocket<Build>> {
         .configure(rocket::Config {
             port: config.server.port,
             address: IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)),
-            limits: Limits::default().limit("json", 4.mebibytes()),
+            limits: Limits::default().limit("json", config.server.limits.json),
             ..Default::default()
         })
         .manage(config.clone())

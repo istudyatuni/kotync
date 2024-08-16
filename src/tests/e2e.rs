@@ -445,10 +445,10 @@ mod data {
 
 pub mod utils {
     use anyhow::Result;
-    use rocket::{http::Status, local::blocking::Client, uri};
+    use rocket::{data::ToByteUnit, http::Status, local::blocking::Client, uri};
 
     use crate::{
-        config::{Conf, ConfDB, ConfJWT, ConfServer},
+        config::{Conf, ConfDB, ConfJWT, ConfServer, ConfServerLimits},
         db::conn::DB,
         models::{request, response},
         rocket, routes,
@@ -498,6 +498,9 @@ pub mod utils {
                 port: 8080,
                 admin_api: Some("/admin".to_string()),
                 allow_new_register,
+                limits: ConfServerLimits {
+                    json: 4.mebibytes(),
+                },
             },
             db: db_conf.clone(),
             jwt: ConfJWT {

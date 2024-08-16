@@ -1,5 +1,7 @@
 use std::fmt::Display;
 
+use rocket::data::ByteUnit;
+
 #[derive(Debug, Clone, confique::Config)]
 pub struct Conf {
     #[config(nested)]
@@ -18,6 +20,14 @@ pub struct ConfServer {
     pub admin_api: Option<String>,
     #[config(env = "ALLOW_NEW_REGISTER", default = true)]
     pub allow_new_register: bool,
+    #[config(nested)]
+    pub limits: ConfServerLimits,
+}
+
+#[derive(Debug, Clone, confique::Config)]
+pub struct ConfServerLimits {
+    #[config(env = "LIMITS_JSON", default = "4MiB")]
+    pub json: ByteUnit,
 }
 
 #[derive(Debug, Clone, confique::Config)]
@@ -85,6 +95,8 @@ impl Display for Conf {
         }
         f.pad("\n  server.allow_new_register: ")?;
         self.server.allow_new_register.fmt(f)?;
+        f.pad("\n  server.limits.json: ")?;
+        self.server.limits.json.fmt(f)?;
 
         f.pad("\n  db.url: ")?;
         f.pad(&self.db.url())?;

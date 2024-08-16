@@ -5,6 +5,10 @@ port = 8080
 admin_api = "/admin"
 allow_new_register = true
 
+# examples: 256 kB, 0.500 mib, 1MB, 1GiB
+[server.limits]
+json = "4MiB"
+
 [db]
 # sqlite
 url = "data.db"

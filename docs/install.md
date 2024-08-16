@@ -13,6 +13,7 @@ After that fill environment variables inside. Some notes:
 - VERSION can be `dev`, or the version itself, like `0.1.0`. See all tags [here](https://github.com/istudyatuni/kotync/pkgs/container/kotync).
 - ADMIN_API is optional path prefix to enable some additiional features, like statistics. URL will look like `http://IP/ADMIN_API/stats`
 - RUST_LOG - set level of logging
+- LIMITS_JSON - change limit for JSON payload for requests. Examples: `256 kB`, `0.500 mib`, `1MB`, `1GiB`
 
 Then run:
 

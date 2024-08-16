@@ -35,3 +35,6 @@ check: clippy test
 # run checks in CI (no mysql)
 ci: && clippy test-new
 	cargo fmt --check
+
+format:
+	cargo fmt

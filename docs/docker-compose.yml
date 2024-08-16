@@ -34,6 +34,7 @@ services:
       JWT_SECRET: SECRET
       ALLOW_NEW_REGISTER: true
       # ADMIN_API: /ADMIN
+      # LIMITS_JSON: 4MiB
       # RUST_LOG: info
     ports:
       - 8081:8080
@@ -52,6 +53,7 @@ services:
       JWT_SECRET: SECRET
       ALLOW_NEW_REGISTER: true
       # ADMIN_API: /ADMIN
+      # LIMITS_JSON: 4MiB
       # RUST_LOG: info
     ports:
       - 8081:8080
