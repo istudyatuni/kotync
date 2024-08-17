@@ -36,10 +36,8 @@ pub struct ConfServerLimits {
 pub struct ConfJWT {
     #[config(env = "JWT_SECRET")]
     pub secret: String,
-    #[config(default = "http://0.0.0.0:8080/")]
+    #[config(env = "JWT_ISSUER", default = "http://0.0.0.0:8080")]
     pub issuer: String,
-    #[config(default = "http://0.0.0.0:8080/resource")]
-    pub audience: String,
 }
 
 #[cfg(feature = "sqlite")]
@@ -111,8 +109,6 @@ impl Display for Conf {
         }
         f.pad("\n  jwt.issuer: ")?;
         f.pad(&self.jwt.issuer)?;
-        f.pad("\n  jwt.audience: ")?;
-        f.pad(&self.jwt.audience)?;
 
         Ok(())
     }

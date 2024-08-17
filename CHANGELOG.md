@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- JWT issuer can be configured with `JWT_ISSUER` env now
+
+### Removed
+
+- JWT audience cannot be configured now
+
 ## v0.2 (2024-08-16)
 
 ### Added
