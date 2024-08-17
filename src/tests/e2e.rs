@@ -506,7 +506,6 @@ pub mod utils {
             jwt: ConfJWT {
                 secret: "test".to_string(),
                 issuer: "http://example.com".to_string(),
-                audience: "http://example.com/resource".to_string(),
             },
         };
         Ok(Client::untracked(rocket(config, db)?)?)
