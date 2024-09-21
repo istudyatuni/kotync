@@ -36,10 +36,7 @@ pub fn auth(
     })?;
     let user = match user {
         Some(u) if req.check_password(&u).is_err() => {
-            return Err(ResponseData::StatusMessage(Custom(
-                Status::BadRequest,
-                "Wrong password",
-            )))
+            return Err((Status::BadRequest, "Wrong password").into())
         }
         #[cfg(feature = "migrate-md5")]
         Some(u) if u.password.len() == MD5_LEN => {
@@ -52,10 +49,7 @@ pub fn auth(
         Some(u) => u,
         None => {
             if !config.server.allow_new_register {
-                return Err(ResponseData::StatusMessage(Custom(
-                    Status::Forbidden,
-                    "registration of new users is disabled",
-                )));
+                return Err((Status::Forbidden, "registration of new users is disabled").into());
             }
             log::debug!("creating user");
             db.create_user(&req.email, &req.password).map_err(|e| {
@@ -72,17 +66,18 @@ pub fn auth(
             "failed to generate token",
         ))
     })?;
-    Ok(ResponseData::Body(Json(response::Auth { token })))
+    Ok(Json(response::Auth { token }).into())
 }
 
 #[get("/me")]
 pub fn me(token: Result<ApiToken, AuthError>, db: &State<DB>) -> Response<Json<response::Me>> {
     let user = user_by_token(token, db)?;
-    Ok(ResponseData::Body(Json(response::Me {
+    Ok(Json(response::Me {
         id: user.id,
         email: user.email,
         nickname: user.nickname,
-    })))
+    })
+    .into())
 }
 
 #[get("/manga/<id>")]
@@ -91,9 +86,9 @@ pub fn get_manga(id: i64, db: &State<DB>) -> Response<Option<Json<common::Manga>
         log::error!("failed to get manga {id}: {e}");
         ResponseData::Status(Status::InternalServerError)
     })?;
-    Ok(ResponseData::Body(manga.map(|(manga, tags)| {
-        Json(manga.to_api(tags.iter().map(|t| t.to_api()).collect()))
-    })))
+    Ok(manga
+        .map(|(manga, tags)| Json(manga.to_api(tags.iter().map(|t| t.to_api()).collect())))
+        .into())
 }
 
 #[get("/manga?<offset>&<limit>")]
@@ -101,27 +96,18 @@ pub fn list_manga(
     offset: Option<usize>,
     limit: Option<usize>,
     db: &State<DB>,
-) -> Response<Json<Vec<common::Manga>>> {
+) -> Response<Json<Vec<common::Manga>>, &'static str> {
     let Some(offset) = offset else {
-        return Err(ResponseData::StatusMessage(Custom(
-            Status::BadRequest,
-            "offset is required".to_string(),
-        )));
+        return Err((Status::BadRequest, "offset is required").into());
     };
     let Some(limit) = limit else {
-        return Err(ResponseData::StatusMessage(Custom(
-            Status::BadRequest,
-            "limit is required".to_string(),
-        )));
+        return Err((Status::BadRequest, "limit is required").into());
     };
     if limit > 1000 {
-        return Err(ResponseData::StatusMessage(Custom(
-            Status::BadRequest,
-            "max limit is 1000".to_string(),
-        )));
+        return Err((Status::BadRequest, "max limit is 1000").into());
     }
 
-    let list = db
+    let list: Vec<_> = db
         .list_manga(offset, limit)
         .map_err(|e| {
             log::error!("failed to list manga: {e}");
@@ -130,5 +116,5 @@ pub fn list_manga(
         .into_iter()
         .map(|(manga, tags)| manga.to_api(tags.into_iter().map(|t| t.to_api()).collect()))
         .collect();
-    Ok(ResponseData::Body(Json(list)))
+    Ok(Json(list).into())
 }

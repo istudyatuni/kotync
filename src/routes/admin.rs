@@ -13,7 +13,7 @@ pub fn stats(db: &State<DB>) -> Response<Json<admin::DBStats>> {
         ResponseData::Status(Status::InternalServerError)
     })?;
 
-    Ok(ResponseData::Body(Json(stats)))
+    Ok(Json(stats).into())
 }
 
 #[get("/info")]

@@ -33,3 +33,15 @@ fn user_by_token(token: Result<ApiToken, AuthError>, db: &State<DB>) -> Response
             "user not found".into(),
         )))
 }
+
+impl<R> From<R> for ResponseData<R> {
+    fn from(value: R) -> Self {
+        Self::Body(value)
+    }
+}
+
+impl<R> From<(Status, R)> for ResponseData<R> {
+    fn from((status, err): (Status, R)) -> Self {
+        Self::StatusMessage(Custom(status, err))
+    }
+}

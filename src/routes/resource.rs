@@ -43,7 +43,7 @@ pub fn save_favourites(
     match req.0 == data {
         // is this real usecase?
         true => Ok(ResponseData::Status(Status::NoContent)),
-        false => Ok(ResponseData::Body(Json(data))),
+        false => Ok(Json(data).into()),
     }
 }
 
@@ -60,7 +60,7 @@ pub fn get_favourites(
         );
         ResponseData::Status(Status::InternalServerError)
     })?;
-    Ok(ResponseData::Body(Json(data)))
+    Ok(Json(data).into())
 }
 
 #[post("/history", data = "<req>")]
@@ -93,7 +93,7 @@ pub fn save_history(
     match req.0 == data {
         // is this real usecase?
         true => Ok(ResponseData::Status(Status::NoContent)),
-        false => Ok(ResponseData::Body(Json(data))),
+        false => Ok(Json(data).into()),
     }
 }
 
@@ -107,5 +107,5 @@ pub fn get_history(
         log::error!("failed to load history_package for user {}: {e}", user.id);
         ResponseData::Status(Status::InternalServerError)
     })?;
-    Ok(ResponseData::Body(Json(data)))
+    Ok(Json(data).into())
 }
