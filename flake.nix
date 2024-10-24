@@ -14,7 +14,7 @@
 
         naersk' = pkgs.callPackage naersk {};
 
-      in rec {
+      in {
         # For `nix build` & `nix run`:
         defaultPackage = naersk'.buildPackage {
           src = ./.;

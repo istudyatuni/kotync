@@ -38,3 +38,6 @@ ci: && clippy test-new
 
 format:
 	cargo fmt
+
+shell:
+	nix develop --profile flake.drv
