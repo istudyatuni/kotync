@@ -171,6 +171,7 @@ fn test_sync_favourites() -> Result<()> {
 }
 
 #[test]
+// todo: test for sync which doesn't change data in db (which returns 204)
 fn test_sync_history() -> Result<()> {
     let client = prepare_client()?;
     let auth = make_user(&client);
@@ -461,6 +462,7 @@ pub mod utils {
     #[cfg(feature = "sqlite")]
     pub fn get_db() -> Result<(ConfDB, DB)> {
         let conf = ConfDB {
+            // todo: revert to file-based
             url: ":memory:".to_string(),
         };
         Ok((conf.clone(), DB::new(conf)?))
