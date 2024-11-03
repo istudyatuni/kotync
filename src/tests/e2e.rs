@@ -461,10 +461,27 @@ pub mod utils {
 
     #[cfg(feature = "sqlite")]
     pub fn get_db() -> Result<(ConfDB, DB)> {
-        let conf = ConfDB {
-            // todo: revert to file-based
-            url: ":memory:".to_string(),
+        use std::{
+            ops::Range,
+            sync::{Mutex, OnceLock},
         };
+
+        const TEST_DB_COUNT: usize = 100;
+        static COUNTER: OnceLock<Mutex<Range<usize>>> = OnceLock::new();
+
+        let id = COUNTER
+            .get_or_init(|| Mutex::new(IntoIterator::into_iter(0..TEST_DB_COUNT)))
+            .lock()
+            .unwrap()
+            .next()
+            .unwrap();
+        let db_url = format!("target/data{id}.db");
+        match std::fs::remove_file(&db_url) {
+            Ok(()) => (),
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => (),
+            Err(e) => return Err(e.into()),
+        }
+        let conf = ConfDB { url: db_url };
         Ok((conf.clone(), DB::new(conf)?))
     }
 
