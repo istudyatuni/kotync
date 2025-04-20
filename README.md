@@ -2,6 +2,15 @@
 
 Rewrite of [Kotatsu Synchronization Server](https://github.com/KotatsuApp/kotatsu-syncserver) in Rust.
 
+## Hosted servers
+
+These are not official servers, use at your own risk.
+
+|Server|Location|Status|
+|-|-|-|
+|`kosync.estebiu.com`|Nice, France|![](https://img.shields.io/website?url=https%3A%2F%2Fkosync.estebiu.com&label=sync)|
+|`kotync.013666.xyz`|San Jose, Usa|![](https://img.shields.io/website?url=https%3A%2F%2Fkotync.013666.xyz&label=sync)|
+
 ## Compatibility
 
 - Can work with MySQL database from original server. See [Installing](/docs/install.md).
