@@ -37,7 +37,7 @@ pub fn auth(
     let user = match user {
         Some(u) if req.check_password(&u).is_err() => {
             // todo: wait for 2s (configurable)
-            return Err((Status::BadRequest, "Wrong password").into())
+            return Err((Status::BadRequest, "Wrong password").into());
         }
         #[cfg(feature = "migrate-md5")]
         Some(u) if u.password.len() == MD5_LEN => {
