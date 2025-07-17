@@ -7,7 +7,7 @@ Some notes:
 3. Version prefixes:
     - Without prefix: server with SQLite as storage
     - `VERSION-mysql`: server with MySQL
-    - `VERSION-original`: server with MySQL from original server
+    - `VERSION-original`: server with MySQL that can run on top of database created by the original server
 
 ### With docker-compose
 

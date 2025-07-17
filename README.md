@@ -13,7 +13,7 @@ These are not official servers, use at your own risk.
 
 ## Compatibility
 
-- Can work with MySQL database from original server. See [Installing](/docs/install.md).
+- Can run on top of MySQL database created by the original server. See [Installing](/docs/install.md).
 
 ## Differences
 
