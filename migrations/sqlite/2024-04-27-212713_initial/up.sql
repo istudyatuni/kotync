@@ -2,13 +2,14 @@ create table manga
 (
     id              bigint       not null,
     title           varchar(84)  not null,
-    alt_title       varchar(84)  null,
+    alt_title       varchar(84),
     url             varchar(255) not null,
     public_url      varchar(255) not null,
     rating          float        not null,
     is_nsfw         tinyint(1)   not null,
     cover_url       varchar(255) not null,
     large_cover_url varchar(255) null,
+    -- ONGOING, FINISHED, ABANDONED, PAUSED, UPCOMING
     state           char(24)     null,
     author          varchar(32)  null,
     source          varchar(32)  not null,
@@ -17,10 +18,10 @@ create table manga
 
 create table tags
 (
-    id     bigint      not null,
-    title  varchar(64) not null,
+    id     bigint       not null,
+    title  varchar(64)  not null,
     `key`  varchar(120) not null,
-    source varchar(32) not null,
+    source varchar(32)  not null,
     primary key (id)
 );
 

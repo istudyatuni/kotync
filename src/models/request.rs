@@ -32,7 +32,7 @@ impl Auth {
         if !matches!(self.password.len(), 2..=24) {
             return Err("Password should be from 2 to 24 characters long");
         }
-        if !matches!(self.email.len(), 5..=120) || !self.email.contains('@') {
+        if !matches!(self.email.len(), 5..=320) || !self.email.contains('@') {
             return Err("Invalid email address");
         }
 
@@ -45,11 +45,12 @@ impl Auth {
     }
 
     pub fn check_password(&self, user: &User) -> Result<(), ()> {
-        if self.password == user.password {
+        if self.password == user.password_hash {
             return Ok(());
         }
+        // todo: also migrate new passwords for "original"
         #[cfg(feature = "migrate-md5")]
-        if user.password.len() == MD5_LEN && self.password_md5 == user.password {
+        if user.password_hash.len() == MD5_LEN && self.password_md5 == user.password_hash {
             return Ok(());
         }
 

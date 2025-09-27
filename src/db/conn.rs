@@ -70,26 +70,26 @@ impl DB {
             .first(&mut self.pool()?)
             .optional()?)
     }
-    pub fn create_user(&self, email: &str, password: &str) -> Result<User> {
+    pub fn create_user(&self, email: &str, password_hash: &str) -> Result<User> {
         use super::schema::users::dsl::users;
 
         // assuming that this user doesn't exists
         diesel::insert_into(users)
             .values(UserInsert {
                 email: email.to_string(),
-                password: password.to_string(),
+                password_hash: password_hash.to_string(),
             })
             .execute(&mut self.pool()?)?;
 
         self.get_user_by_email(email).map(|u| u.unwrap())
     }
     #[cfg(feature = "migrate-md5")]
-    pub fn update_user_password(&self, user_id: UserID, password: &str) -> Result<()> {
-        use super::schema::users::dsl::{id, password as password_col, users};
+    pub fn update_user_password(&self, user_id: UserID, password_hash: &str) -> Result<()> {
+        use super::schema::users::dsl::{id, password_hash as password_col, users};
 
         diesel::update(users)
             .filter(id.eq(user_id))
-            .set(password_col.eq(password))
+            .set(password_col.eq(password_hash))
             .execute(&mut self.pool()?)?;
         Ok(())
     }

@@ -1,5 +1,5 @@
 /.env
-/data.db
+/*.db
 /target
 *.sublime-workspace
 flake.drv*

@@ -24,11 +24,25 @@ pub enum MangaState {
     Abandoned,
     Paused,
     Upcoming,
+    Restricted,
+}
+
+#[derive(
+    Debug, Clone, Copy, PartialEq, Deserialize, Serialize, Default, EnumString, strum::Display,
+)]
+#[strum(serialize_all = "UPPERCASE")]
+#[serde(rename_all = "UPPERCASE")]
+pub enum ContentRating {
+    #[default]
+    Safe,
+    Suggestive,
+    Adult,
 }
 
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub struct FavouritesPackage {
-    #[serde(rename = "favourite_categories")]
+    // alias is used for older app versions
+    #[serde(alias = "favourite_categories")]
     pub categories: Vec<Category>,
     pub favourites: Vec<Favourite>,
     pub timestamp: Option<Time>,
@@ -46,11 +60,11 @@ pub struct Category {
     pub id: i64,
     pub created_at: Time,
     pub sort_key: i32,
-    pub track: i32,
+    pub track: bool,
     pub title: String,
     pub order: String,
     pub deleted_at: Time,
-    pub show_in_lib: i32,
+    pub show_in_lib: bool,
 }
 
 impl Category {
@@ -62,8 +76,8 @@ impl Category {
             title: self.title.truncated(120),
             order: self.order.clone(),
             user_id,
-            track: self.track.to_bool(),
-            show_in_lib: self.show_in_lib.to_bool(),
+            track: self.track,
+            show_in_lib: self.show_in_lib,
             deleted_at: self.deleted_at,
         }
     }
@@ -76,6 +90,7 @@ pub struct Favourite {
     // original is i32
     pub category_id: i64,
     pub sort_key: i32,
+    pub pinned: bool,
     pub created_at: Time,
     pub deleted_at: Time,
 }
@@ -86,6 +101,7 @@ impl Favourite {
             manga_id: self.manga_id,
             category_id: self.category_id,
             sort_key: self.sort_key,
+            pinned: self.pinned,
             created_at: self.created_at,
             deleted_at: self.deleted_at,
             user_id,
@@ -138,8 +154,10 @@ pub struct Manga {
     pub url: String,
     pub public_url: String,
     pub rating: f32,
+    // for compatibility
     #[serde(rename = "nsfw")]
     pub is_nsfw: Option<i32>,
+    pub content_rating: Option<ContentRating>,
     pub cover_url: String,
     pub large_cover_url: Option<String>,
     pub tags: Vec<MangaTag>,
@@ -152,16 +170,25 @@ impl Manga {
     pub fn to_db(&self) -> DBManga {
         DBManga {
             id: self.id,
-            title: self.title.truncated(84),
-            alt_title: self.alt_title.clone().map(|t| t.truncated(84)),
+            title: self.title.truncated(100),
+            alt_title: self.alt_title.clone().map(|t| t.truncated(100)),
             url: self.url.truncated(255),
             public_url: self.public_url.truncated(255),
             rating: self.rating,
-            is_nsfw: self.is_nsfw.to_bool(),
+            content_rating: self.content_rating.map(|r| r.to_string()).or_else(|| {
+                self.is_nsfw.map(|n| {
+                    if n.to_bool() {
+                        ContentRating::Adult
+                    } else {
+                        ContentRating::Safe
+                    }
+                    .to_string()
+                })
+            }),
             cover_url: self.cover_url.truncated(255),
             large_cover_url: None, // ignored?
             state: self.state.map(|s| s.to_string()),
-            author: self.author.clone().map(|p| p.truncated(32)),
+            author: self.author.clone().map(|p| p.truncated(64)),
             source: self.source.truncated(32),
         }
     }

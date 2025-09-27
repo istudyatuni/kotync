@@ -40,7 +40,7 @@ pub fn auth(
             return Err((Status::BadRequest, "Wrong password").into());
         }
         #[cfg(feature = "migrate-md5")]
-        Some(u) if u.password.len() == MD5_LEN => {
+        Some(u) if u.password_hash.len() == MD5_LEN => {
             match db.update_user_password(u.id, &req.password) {
                 Ok(()) => (),
                 Err(e) => log::error!("failed to update user password: {e}"),

@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 use diesel::prelude::*;
 
 #[cfg(feature = "sqlite")]
@@ -7,10 +5,13 @@ use diesel::sqlite::Sqlite as Backend;
 
 #[cfg(feature = "mysql")]
 use diesel::mysql::Mysql as Backend;
+use log::error;
+
+use crate::models::{common::ContentRating, BoolToInt};
 
 use super::common::{
     Category as ApiCategory, Favourite as ApiFavourite, History as ApiHistory, Manga as ApiManga,
-    MangaState, MangaTag as ApiMangaTag, Time, UserID,
+    MangaTag as ApiMangaTag, Time, UserID,
 };
 
 #[derive(Queryable, Selectable, Insertable, Identifiable, AsChangeset, Debug)]
@@ -37,11 +38,11 @@ impl Category {
             id: self.id,
             created_at: self.created_at,
             sort_key: self.sort_key,
-            track: self.track as i32,
+            track: self.track,
             title: self.title.clone(),
             order: self.order.clone(),
             deleted_at: self.deleted_at,
-            show_in_lib: self.show_in_lib as i32,
+            show_in_lib: self.show_in_lib,
         }
     }
 }
@@ -55,6 +56,7 @@ pub struct Favourite {
     pub manga_id: i64,
     pub category_id: i64,
     pub sort_key: i32,
+    pub pinned: bool,
     pub created_at: Time,
     pub deleted_at: Time,
     pub user_id: UserID,
@@ -67,6 +69,7 @@ impl Favourite {
             manga,
             category_id: self.category_id,
             sort_key: self.sort_key,
+            pinned: self.pinned,
             created_at: self.created_at,
             deleted_at: self.deleted_at,
         }
@@ -120,16 +123,22 @@ pub struct Manga {
     pub url: String,
     pub public_url: String,
     pub rating: f32,
-    pub is_nsfw: bool,
     pub cover_url: String,
     pub large_cover_url: Option<String>,
     pub state: Option<String>,
     pub author: Option<String>,
     pub source: String,
+    pub content_rating: Option<String>,
 }
 
 impl Manga {
     pub fn to_api(&self, tags: Vec<ApiMangaTag>) -> ApiManga {
+        // todo: probably need better error handling
+        let content_rating = self.content_rating.as_deref().map(|r| {
+            r.parse()
+                .inspect_err(|e| error!("bad manga content_rating in db: {e}"))
+                .unwrap_or_default()
+        });
         ApiManga {
             id: self.id,
             title: self.title.clone(),
@@ -137,7 +146,9 @@ impl Manga {
             url: self.url.clone(),
             public_url: self.public_url.clone(),
             rating: self.rating,
-            is_nsfw: self.is_nsfw as i32,
+            is_nsfw: content_rating
+                .map(|r| matches!(r, ContentRating::Suggestive | ContentRating::Adult).to_i32()),
+            content_rating,
             cover_url: self.cover_url.clone(),
             large_cover_url: self.large_cover_url.clone(),
             tags,
@@ -145,7 +156,11 @@ impl Manga {
                 .state
                 .clone()
                 // todo: probably need better error handling
-                .map(|s| MangaState::from_str(&s).unwrap_or_default()),
+                .map(|s| {
+                    s.parse()
+                        .inspect_err(|e| error!("bad manga state in db: {e}"))
+                        .unwrap_or_default()
+                }),
             author: self.author.clone(),
             source: self.source.clone(),
         }
@@ -199,7 +214,7 @@ impl Tag {
 pub struct User {
     pub id: UserID,
     pub email: String,
-    pub password: String,
+    pub password_hash: String,
     pub nickname: Option<String>,
     pub favourites_sync_timestamp: Option<Time>,
     pub history_sync_timestamp: Option<Time>,
@@ -212,5 +227,5 @@ pub struct User {
 )]
 pub struct UserInsert {
     pub email: String,
-    pub password: String,
+    pub password_hash: String,
 }

@@ -367,7 +367,10 @@ fn test_stats() -> Result<()> {
 mod data {
     use crate::{
         current_timestamp,
-        models::{common, common::MangaState},
+        models::{
+            common,
+            common::{ContentRating, MangaState},
+        },
     };
 
     pub fn favourites_package() -> common::FavouritesPackage {
@@ -377,17 +380,18 @@ mod data {
                 id: 1,
                 created_at: now,
                 sort_key: 0,
-                track: 0,
+                track: false,
                 title: "test".to_string(),
                 order: "NEWEST".to_string(),
                 deleted_at: 0,
-                show_in_lib: 1,
+                show_in_lib: true,
             }],
             favourites: vec![common::Favourite {
                 manga_id: 1,
                 manga: manga(),
                 category_id: 1,
                 sort_key: 1,
+                pinned: false,
                 created_at: now,
                 deleted_at: now,
             }],
@@ -420,7 +424,8 @@ mod data {
             url: "kotatsu://test".to_string(),
             public_url: "http://example.com/test".to_string(),
             rating: 2.3,
-            is_nsfw: 0,
+            is_nsfw: Some(1),
+            content_rating: Some(ContentRating::Suggestive),
             cover_url: "http://example.com/cover".to_string(),
             large_cover_url: None,
             tags: vec![

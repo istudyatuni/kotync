@@ -22,6 +22,7 @@ diesel::table! {
         created_at -> BigInt,
         deleted_at -> BigInt,
         user_id -> Integer,
+        pinned -> Bool,
     }
 }
 
@@ -48,12 +49,12 @@ diesel::table! {
         url -> Text,
         public_url -> Text,
         rating -> Float,
-        is_nsfw -> Bool,
         cover_url -> Text,
         large_cover_url -> Nullable<Text>,
         state -> Nullable<Text>,
         author -> Nullable<Text>,
         source -> Text,
+        content_rating -> Nullable<Text>,
     }
 }
 
@@ -77,7 +78,7 @@ diesel::table! {
     users (id) {
         id -> Integer,
         email -> Text,
-        password -> Text,
+        password_hash -> Text,
         nickname -> Nullable<Text>,
         favourites_sync_timestamp -> Nullable<BigInt>,
         history_sync_timestamp -> Nullable<BigInt>,

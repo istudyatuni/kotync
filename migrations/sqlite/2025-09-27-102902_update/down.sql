@@ -1,0 +1,2 @@
+-- fail
+create table users;
