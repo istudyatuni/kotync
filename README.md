@@ -27,7 +27,7 @@ These are not official servers, use at your own risk.
 ## Why?
 
 - To run on low hardware
-- To run as single-binary (turns out, that's currently problematic, because of linking error during cross-compilation)
+- To run as single-binary
 - To not use database server (SQLite is used instead by default)
 
 ## Installing

@@ -103,6 +103,22 @@ cargo b --release
 cargo b --release --no-default-features --features=mysql
 ```
 
+### From source (static binary)
+
+#### For Linux
+
+```sh
+# requires https://github.com/casey/just
+just build-static-sqlite
+
+# or manually
+docker run --rm -it \
+    -v "$(pwd)":/build \
+    -w /build \
+    ghcr.io/rust-cross/rust-musl-cross:x86_64-musl \
+    cargo build --release --features sqlite-bundled --target=x86_64-unknown-linux-musl
+```
+
 <!-- #### Cross-compile
 
 You need [cross](https://github.com/cross-rs/cross?tab=readme-ov-file#installation) installed.

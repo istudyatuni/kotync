@@ -15,6 +15,9 @@ migrate-md5 = ["dep:md-5"]
 sqlite = ["diesel/sqlite", "diesel_migrations/sqlite"]
 mysql = ["diesel/mysql", "diesel_migrations/mysql"]
 
+# bundle sqlite for diesel https://github.com/diesel-rs/diesel/issues/1860
+sqlite-bundled = ["dep:libsqlite3-sys", "libsqlite3-sys/bundled"]
+
 [dependencies]
 anyhow = "1.0.82"
 blake3 = "1.5.1"
@@ -23,6 +26,7 @@ diesel = { version = "2.2", features = ["r2d2"] }
 diesel_migrations = "2.2"
 dotenvy = "0.15.7"
 jsonwebtoken = "9.3.0"
+libsqlite3-sys = { version = "*", optional = true }
 log = { version = "0.4.21", features = ["kv"] }
 md-5 = { version = "0.10.6", optional = true }
 rocket = { version = "0.5.0", features = ["json"] }
@@ -31,8 +35,6 @@ simplelog = "0.12.2"
 thiserror = "1.0.59"
 unicode-segmentation = "1.11.0"
 
-# bundle sqlite for diesel https://github.com/diesel-rs/diesel/issues/1860
-# libsqlite3-sys = { version = "*", optional = true, features = ["bundled"] }
 
 [dev-dependencies]
 similar-asserts = "1.5.0"
