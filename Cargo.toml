@@ -19,23 +19,23 @@ mysql = ["diesel/mysql", "diesel_migrations/mysql"]
 sqlite-bundled = ["dep:libsqlite3-sys", "libsqlite3-sys/bundled"]
 
 [dependencies]
-anyhow = "1.0.82"
-blake3 = "1.5.1"
-confique = { version = "0.2.5", default-features = false, features = ["toml"] }
-diesel = { version = "2.2", features = ["r2d2"] }
-diesel_migrations = "2.2"
+anyhow = "1.0.100"
+blake3 = "1.8.2"
+confique = { version = "0.3.1", default-features = false, features = ["toml"] }
+diesel = { version = "2.3.2", features = ["r2d2"] }
+diesel_migrations = "2.3"
 dotenvy = "0.15.7"
-jsonwebtoken = "9.3.0"
+jsonwebtoken = "9.3.1"
 libsqlite3-sys = { version = "*", optional = true }
-log = { version = "0.4.21", features = ["kv"] }
+log = { version = "0.4.28", features = ["kv"] }
 md-5 = { version = "0.10.6", optional = true }
-rocket = { version = "0.5.0", features = ["json"] }
-serde = { version = "1.0.199", features = ["derive"] }
+rocket = { version = "0.5.1", features = ["json"] }
+serde = { version = "1.0.227", features = ["derive"] }
 simplelog = "0.12.2"
 strum = { version = "0.27.2", features = ["derive"] }
-thiserror = "1.0.59"
-unicode-segmentation = "1.11.0"
+thiserror = "2.0.16"
+unicode-segmentation = "1.12.0"
 
 
 [dev-dependencies]
-similar-asserts = "1.5.0"
+similar-asserts = "1.7.0"
