@@ -1,7 +1,5 @@
-use std::{fmt::Display, str::FromStr};
-
-use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
+use strum::EnumString;
 
 use super::{
     db::{
@@ -14,47 +12,18 @@ use super::{
 pub type Time = i64;
 pub type UserID = i32;
 
-#[derive(Debug, Clone, Copy, PartialEq, Deserialize, Serialize, Default)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Deserialize, Serialize, Default, EnumString, strum::Display,
+)]
+#[strum(serialize_all = "UPPERCASE")]
+#[serde(rename_all = "UPPERCASE")]
 pub enum MangaState {
     #[default]
-    #[serde(rename = "ONGOING")]
     Ongoing,
-    #[serde(rename = "FINISHED")]
     Finished,
-    #[serde(rename = "ABANDONED")]
     Abandoned,
-    #[serde(rename = "PAUSED")]
     Paused,
-    #[serde(rename = "UPCOMING")]
     Upcoming,
-}
-
-impl Display for MangaState {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let s = match self {
-            MangaState::Ongoing => "ONGOING",
-            MangaState::Finished => "FINISHED",
-            MangaState::Abandoned => "ABANDONED",
-            MangaState::Paused => "PAUSED",
-            MangaState::Upcoming => "UPCOMING",
-        };
-        f.pad(s)
-    }
-}
-
-impl FromStr for MangaState {
-    type Err = anyhow::Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "ONGOING" => Ok(Self::Ongoing),
-            "FINISHED" => Ok(Self::Finished),
-            "ABANDONED" => Ok(Self::Abandoned),
-            "PAUSED" => Ok(Self::Paused),
-            "UPCOMING" => Ok(Self::Upcoming),
-            _ => Err(anyhow!("unknown manga state")),
-        }
-    }
 }
 
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
@@ -170,7 +139,7 @@ pub struct Manga {
     pub public_url: String,
     pub rating: f32,
     #[serde(rename = "nsfw")]
-    pub is_nsfw: i32,
+    pub is_nsfw: Option<i32>,
     pub cover_url: String,
     pub large_cover_url: Option<String>,
     pub tags: Vec<MangaTag>,
