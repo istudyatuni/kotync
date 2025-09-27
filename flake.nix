@@ -28,6 +28,7 @@
             # cargo
             sqlite
             libmysqlclient.dev
+            diesel-cli
           ];
         };
       }

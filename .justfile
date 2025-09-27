@@ -13,6 +13,9 @@ remake-mysql: && up-mysql
 	docker compose down test-db
 	docker volume rm kotync_db_data
 
+new-migration name:
+	diesel migration generate "{{ name }}"
+
 [private]
 test-new:
 	cargo test --no-default-features --features=new
