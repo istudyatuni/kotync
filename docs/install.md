@@ -11,6 +11,25 @@ Some notes:
 1. "Original" version does not support databases created before [July 31, 2025](https://github.com/KotatsuApp/kotatsu-syncserver/commit/13673dd0d3d40b974062ccc9bf88f1a39dfa909e) (because the database structure was significantly altered in [KotatsuApp/kotatsu-syncserver#25](https://github.com/KotatsuApp/kotatsu-syncserver/pull/25))
 1. I think "original" version _should_ currently support newer versions, but I haven't been able to test it
 
+### As a static binary
+
+Since v0.3 static binary for Linux is provided (only "sqlite" version). Download `kotync.tar.gz` from [release assets](https://github.com/istudyatuni/kotync/releases/latest), and then:
+
+```sh
+# unpack
+tar xzf kotync.tar.gz
+
+# generate random uuid for secret
+echo JWT_SECRET=$(uuidgen) > .env
+# or set it manually
+echo JWT_SECRET=YOUR_SECRET > .env
+
+mv kotync /usr/local/bin
+
+# run (in the same directory where .env file is located)
+kotync
+```
+
 ### With docker-compose
 
 Download [`docker-compose.yaml`](https://github.com/istudyatuni/kotync/blob/master/docs/docker-compose.yml):

@@ -54,7 +54,7 @@ format:
 shell:
 	nix develop --profile flake.drv
 
-build-static-sqlite:
+build-static-sqlite: && pack-static-sqlite
 	@# CARGO_HOME and /tmp/.cargo is used to use local cargo download cache
 	docker run --rm -it \
 		-v "$(pwd)":/build \
@@ -66,3 +66,7 @@ build-static-sqlite:
 			--features sqlite-bundled \
 			--target=x86_64-unknown-linux-musl \
 			--config build.rustc-wrapper="''"
+
+[private]
+pack-static-sqlite:
+	tar -C target/x86_64-unknown-linux-musl/release -czf target/kotync.tar.gz kotync
