@@ -16,6 +16,9 @@ remake-mysql: && up-mysql
 new-migration name:
 	diesel migration generate "{{ name }}"
 
+gen-db-schema:
+	diesel migration run
+
 run-server-sqlite:
 	cargo r --no-default-features --features=new
 

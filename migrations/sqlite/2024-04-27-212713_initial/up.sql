@@ -1,27 +1,27 @@
 create table manga
 (
-    id              bigint       not null,
-    title           varchar(84)  not null,
-    alt_title       varchar(84),
-    url             varchar(255) not null,
-    public_url      varchar(255) not null,
-    rating          float        not null,
-    is_nsfw         tinyint(1)   not null,
-    cover_url       varchar(255) not null,
-    large_cover_url varchar(255) null,
-    -- ONGOING, FINISHED, ABANDONED, PAUSED, UPCOMING
-    state           char(24)     null,
-    author          varchar(32)  null,
-    source          varchar(32)  not null,
+    id              bigint not null,
+    title           text   not null,
+    alt_title       text,
+    url             text       not null,
+    public_url      text       not null,
+    rating          float      not null,
+    is_nsfw         tinyint(1) not null,
+    cover_url       text       not null,
+    large_cover_url text,
+    -- ONGOING, FINISHED, ABANDONED, PAUSED, UPCOMING, RESTRICTED
+    state           text,
+    author          text,
+    source          text not null,
     primary key (id)
 );
 
 create table tags
 (
-    id     bigint       not null,
-    title  varchar(64)  not null,
-    `key`  varchar(120) not null,
-    source varchar(32)  not null,
+    id     bigint not null,
+    title  text   not null,
+    `key`  text   not null,
+    source text   not null,
     primary key (id)
 );
 
@@ -43,11 +43,11 @@ create index tag_id
 create table users
 (
     id                        integer primary key autoincrement not null,
-    email                     varchar(120) not null,
-    password                  char(64) not null,
-    nickname                  varchar(84) null,
-    favourites_sync_timestamp bigint   null,
-    history_sync_timestamp    bigint   null
+    email                     text not null,
+    password                  text not null,
+    nickname                  text,
+    favourites_sync_timestamp bigint,
+    history_sync_timestamp    bigint
 );
 
 create unique index users_email_uindex
@@ -55,15 +55,15 @@ create unique index users_email_uindex
 
 create table categories
 (
-    id          bigint       not null,
-    created_at  bigint       not null,
-    sort_key    int          not null,
-    title       varchar(120) not null,
-    `order`     char(16)     not null,
-    user_id     int          not null,
-    track       tinyint(1)   not null,
-    show_in_lib tinyint(1)   not null,
-    deleted_at  bigint       not null,
+    id          bigint     not null,
+    created_at  bigint     not null,
+    sort_key    int        not null,
+    title       text       not null,
+    `order`     text       not null,
+    user_id     int        not null,
+    track       tinyint(1) not null,
+    show_in_lib tinyint(1) not null,
+    deleted_at  bigint     not null,
     primary key (id, user_id),
     constraint categories_ibfk_1
         foreign key (user_id) references users (id)
