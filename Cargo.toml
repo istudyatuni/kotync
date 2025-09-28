@@ -4,7 +4,7 @@ name = "kotync"
 version = "0.2.0"
 edition = "2021"
 # also update in Dockerfile and .github/workflows
-rust-version = "1.81"
+rust-version = "1.86"
 
 [features]
 default = ["new"]
