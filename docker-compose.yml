@@ -6,6 +6,11 @@ services:
       MARIADB_PASSWORD: asdf
       MARIADB_DATABASE: kotatsu_db_test
       MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: true
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - db_data:/var/lib/mariadb
     ports:

@@ -6,6 +6,11 @@ services:
       MARIADB_PASSWORD: PASSWORD
       MARIADB_DATABASE: kotatsu_db
       MARIADB_ROOT_PASSWORD: ROOT_PASSWORD
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - /var/lib/mysql:/var/lib/mysql
       # socket
@@ -22,7 +27,8 @@ services:
     image: ghcr.io/istudyatuni/kotync:VERSION-original
     container_name: kotync-original
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     links:
       - db
     environment:
