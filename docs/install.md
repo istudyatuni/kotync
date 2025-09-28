@@ -3,11 +3,13 @@
 Some notes:
 
 1. See description of configuration variables in [config.md](config.md)
-2. VERSION can be `dev`, or the version itself, like `0.1.0`. See all tags [here](https://github.com/istudyatuni/kotync/pkgs/container/kotync)
-3. Version prefixes:
+1. VERSION can be `dev`, or the version itself, like `0.1.0`. See all tags [here](https://github.com/istudyatuni/kotync/pkgs/container/kotync)
+1. Version prefixes:
     - Without prefix: server with SQLite as storage
     - `VERSION-mysql`: server with MySQL
     - `VERSION-original`: server with MySQL that can run on top of database created by the original server
+1. "Original" version does not support databases created before [July 31, 2025](https://github.com/KotatsuApp/kotatsu-syncserver/commit/13673dd0d3d40b974062ccc9bf88f1a39dfa909e) (because the database structure was significantly altered in [KotatsuApp/kotatsu-syncserver#25](https://github.com/KotatsuApp/kotatsu-syncserver/pull/25))
+1. I think "original" version _should_ currently support newer versions, but I haven't been able to test it
 
 ### With docker-compose
 
