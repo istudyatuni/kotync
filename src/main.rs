@@ -26,6 +26,8 @@ mod routes;
 #[cfg(test)]
 mod tests;
 
+const VERSION: &str = env!("CARGO_PKG_VERSION");
+
 static CONFIG: OnceLock<Conf> = OnceLock::new();
 
 fn get_config() -> Result<&'static Conf> {
@@ -36,6 +38,8 @@ fn get_config() -> Result<&'static Conf> {
 
 #[rocket::main]
 async fn main() -> Result<()> {
+    eprintln!("Kotync v{VERSION}");
+
     init_logger()?;
     dotenv()?;
 
@@ -120,7 +124,7 @@ fn init_logger() -> Result<()> {
         })
         .unwrap_or(DEFAULT);
 
-    eprintln!("set log level {level}");
+    eprintln!("Using log level {level}");
 
     TermLogger::init(
         level,
