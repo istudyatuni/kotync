@@ -39,9 +39,9 @@ alter table users rename column password to password_hash;
 create table users_new
 (
     id            integer primary key autoincrement not null,
-    email         varchar(320) not null unique,
-    password_hash varchar(128) not null, -- updated
-    nickname      varchar(100),          -- updated
+    email         varchar(320) not null unique, -- updated
+    password_hash varchar(128) not null,        -- updated
+    nickname      varchar(100),                 -- updated
     favourites_sync_timestamp bigint,
     history_sync_timestamp    bigint
 );

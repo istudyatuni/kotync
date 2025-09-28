@@ -50,6 +50,9 @@ create table users
     history_sync_timestamp    bigint   null
 );
 
+create unique index users_email_uindex
+    on users (email);
+
 create table categories
 (
     id          bigint       not null,
@@ -112,6 +115,3 @@ create table history
 
 create index manga_id
     on history (manga_id);
-
-create unique index users_email_uindex
-    on users (email);

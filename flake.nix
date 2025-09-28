@@ -26,9 +26,14 @@
           nativeBuildInputs = with pkgs; [
             # rustc
             # cargo
+
+            # libraries
             sqlite
             libmysqlclient.dev
+
+            # cli tools
             diesel-cli
+            mariadb-client
           ];
         };
       }
