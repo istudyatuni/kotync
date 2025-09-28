@@ -4,7 +4,12 @@
 
 ### Added
 
+- Server can now be built as a static binary
 - JWT issuer can be configured with `JWT_ISSUER` env now
+
+### Updated
+
+- Update to latest changes (up to Kotatsu 9.2)
 
 ### Removed
 
