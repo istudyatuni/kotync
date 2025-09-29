@@ -23,8 +23,8 @@ services:
 
   # server with mysql
   server-mysql:
-    # if you do not need to work with original database, change "-original" to "-mysql"
-    image: ghcr.io/istudyatuni/kotync:VERSION-original
+    # if you want to work with original database, change "-mysql" to "-original"
+    image: ghcr.io/istudyatuni/kotync:VERSION-mysql
     container_name: kotync-original
     depends_on:
       db:
