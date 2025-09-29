@@ -2,46 +2,52 @@
 @default:
 	just --list
 
+[private]
+cargo cmd kind *args:
+	cargo {{ cmd }} --no-default-features --features={{ kind }} -- {{ args }}
+
+# start mariadb docker container
 up-mysql:
 	docker compose up -d test-db
 
+# connect to mariadb docker container
 connect-mysql port="3307" user="root" db="kotatsu_db_test":
 	mariadb -h 0.0.0.0 -P {{port}} -u {{user}} {{db}}
 
-# drop volume kotync_db_data
+# drop volume kotync_db_data and restart mariadb container
 remake-mysql: && up-mysql
 	docker compose down test-db
 	docker volume rm kotync_db_data
 
+# create new migration
 new-migration name:
 	diesel migration generate "{{ name }}"
 
+# generate schema for new migrations
 gen-db-schema:
 	diesel migration run
 
-run-server-sqlite:
-	cargo r --no-default-features --features=new
-
-run-server-mysql:
-	cargo r --no-default-features --features=mysql
+# run server
+run kind="new": (cargo "run" "new")
 
 [private]
-test-new:
-	cargo test --no-default-features --features=new
+test-new: (cargo "test" "new")
 
 [private]
-test-mysql:
-	cargo test --no-default-features --features=original -- --test-threads 1
-	cargo test --no-default-features --features=mysql -- --test-threads 1
+test-mysql: \
+	(cargo "test" "original" "--test-threads" "1") \
+	(cargo "test" "mysql" "--test-threads" "1")
 
+# run all tests
 test: test-new test-mysql
 
-clippy:
-	cargo clippy --no-default-features --features=new
-	cargo clippy --no-default-features --features=mysql
-	cargo clippy --no-default-features --features=original
+# run clippy for all variants
+clippy: \
+	(cargo "clippy" "new") \
+	(cargo "clippy" "mysql") \
+	(cargo "clippy" "original")
 
-# run checks
+# run full checks
 check: clippy test
 
 # run checks in CI (no mysql)
@@ -54,6 +60,7 @@ format:
 shell:
 	nix develop --profile flake.drv
 
+# build static binary
 build-static-sqlite: && pack-static-sqlite
 	@# CARGO_HOME and /tmp/.cargo is used to use local cargo download cache
 	docker run --rm -it \
