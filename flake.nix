@@ -24,11 +24,8 @@
         # For `nix develop`:
         devShell = pkgs.mkShell {
           nativeBuildInputs = with pkgs; [
-            # rustc
-            # cargo
-
             # libraries
-            sqlite
+            sqlite-interactive.dev
             libmysqlclient.dev
 
             # cli tools
