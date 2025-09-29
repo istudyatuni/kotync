@@ -1,23 +1,9 @@
 # new, original, mysql
 ARG kind=new
 
-# ----- choose features ----- #
-
-# https://stackoverflow.com/a/60820156
-FROM rust:1.86-alpine AS builder-base
-
-FROM builder-base AS builder-new
-ENV FEATURES=new
-
-FROM builder-base AS builder-original
-ENV FEATURES=original
-
-FROM builder-base AS builder-mysql
-ENV FEATURES=mysql
-
 # ----- build ----- #
 
-FROM builder-${kind} AS builder
+FROM rust:1.86-alpine AS builder
 
 # install even unnecessary deps for better caching
 RUN apk add --no-cache musl-dev sqlite-static mariadb-dev
@@ -34,11 +20,12 @@ COPY . /app
 RUN --mount=type=cache,target=/app/target/ \
 	--mount=type=cache,target=/usr/local/cargo/git/db/ \
 	--mount=type=cache,target=/usr/local/cargo/registry/ \
-	cargo b --release --target=x86_64-unknown-linux-musl --no-default-features --features=${FEATURES} \
+	cargo b --release --target=x86_64-unknown-linux-musl --no-default-features --features=${kind} \
 	&& cp /app/target/x86_64-unknown-linux-musl/release/kotync /kotync
 
-# ----- result ----- #
+# ----- select dependencies ----- #
 
+# https://stackoverflow.com/a/60820156
 FROM alpine:3.20 AS run-base
 
 FROM run-base AS run-new
@@ -49,6 +36,8 @@ ENV DEPS=mariadb-connector-c
 
 FROM run-base AS run-mysql
 ENV DEPS=mariadb-connector-c
+
+# ----- result ----- #
 
 FROM run-${kind} AS run
 RUN apk add --no-cache libgcc ${DEPS}
