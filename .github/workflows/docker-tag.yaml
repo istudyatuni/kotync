@@ -25,7 +25,6 @@ jobs:
       - run: test "$(grep -E '^version = "${{ needs.extract-tag.outputs.tag }}"' Cargo.toml)" != ""
   docker:
     needs:
-      - extract-tag
       - check-version
     uses: ./.github/workflows/docker-build.yaml
     with:
