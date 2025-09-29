@@ -35,7 +35,7 @@ kotync
 Download [`docker-compose.yaml`](https://github.com/istudyatuni/kotync/blob/master/docs/docker-compose.yml):
 
 ```sh
-curl -L https://github.com/istudyatuni/kotync/raw/master/docs/docker-compose.yml -o docker-compose.yml
+curl -LO https://github.com/istudyatuni/kotync/raw/master/docs/docker-compose.yml
 ```
 
 After that fill environment variables inside. Then run:
