@@ -14,12 +14,19 @@ jobs:
     outputs:
       tag: ${{ steps.step1.outputs.tag }}
     steps:
-      - name: extract tag
-        id: step1
+      - id: step1
         run: echo "tag=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+  check-version:
+    runs-on: ubuntu-latest
+    needs:
+      - extract-tag
+    steps:
+      # check that Cargo.toml have version equal to tag name
+      - run: test "$(grep -E '^version = "${{ needs.extract-tag.outputs.tag }}"' Cargo.toml)" != ""
   docker:
     needs:
       - extract-tag
+      - check-version
     uses: ./.github/workflows/docker-build.yaml
     with:
       tag: ${{ needs.extract-tag.outputs.tag }}
