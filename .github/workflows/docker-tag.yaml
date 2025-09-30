@@ -18,14 +18,20 @@ jobs:
         run: echo "tag=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
   check-version:
     runs-on: ubuntu-latest
-    needs:
-      - extract-tag
+    needs: extract-tag
     steps:
+      - uses: actions/checkout@v4
+
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+
+      - name: install tools
+        run: nix profile add "nixpkgs#tomlq" && tq -V
+
       # check that Cargo.toml have version equal to tag name
-      - run: test "$(grep -E '^version = "${{ needs.extract-tag.outputs.tag }}"' Cargo.toml)" != ""
+      - run: test "$(tq -f Cargo.toml 'package.version')" = "${{ needs.extract-tag.outputs.tag }}"
   docker:
-    needs:
-      - check-version
+    needs: check-version
     uses: ./.github/workflows/docker-build.yaml
     with:
       tag: ${{ needs.extract-tag.outputs.tag }}
