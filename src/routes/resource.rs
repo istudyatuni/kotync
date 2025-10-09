@@ -1,5 +1,5 @@
 use anyhow::Result;
-use rocket::{get, http::Status, post, serde::json::Json, State};
+use rocket::{State, get, http::Status, post, serde::json::Json};
 
 use crate::{
     current_timestamp,
@@ -8,7 +8,7 @@ use crate::{
     request::{ApiToken, AuthError},
 };
 
-use super::{user_by_token, Response, ResponseData};
+use super::{Response, ResponseData, user_by_token};
 
 #[post("/favourites", data = "<req>")]
 pub fn save_favourites(

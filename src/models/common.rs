@@ -2,11 +2,11 @@ use serde::{Deserialize, Serialize};
 use strum::EnumString;
 
 use super::{
+    IntToBool, TruncatedString,
     db::{
         Category as DBCategory, Favourite as DBFavourite, History as DBHistory, Manga as DBManga,
         Tag as DBTag,
     },
-    IntToBool, TruncatedString,
 };
 
 pub type Time = i64;

@@ -6,10 +6,10 @@ use std::{
     time::SystemTime,
 };
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result, anyhow};
 use confique::Config;
 use log::LevelFilter;
-use rocket::{data::Limits, routes, Build, Rocket};
+use rocket::{Build, Rocket, data::Limits, routes};
 use simplelog::{ColorChoice, ConfigBuilder, TermLogger, TerminalMode};
 
 use config::Conf;

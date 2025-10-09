@@ -1,4 +1,4 @@
-use rocket::{http::Status, response::status::Custom, Responder, State};
+use rocket::{Responder, State, http::Status, response::status::Custom};
 
 use crate::{
     db::conn::DB,

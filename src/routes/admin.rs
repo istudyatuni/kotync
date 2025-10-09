@@ -1,4 +1,4 @@
-use rocket::{get, http::Status, serde::json::Json, State};
+use rocket::{State, get, http::Status, serde::json::Json};
 
 use crate::{db::conn::DB, models::admin};
 

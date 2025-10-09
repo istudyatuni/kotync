@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result, anyhow};
 use diesel::prelude::*;
 use diesel::r2d2::{ConnectionManager, Pool, PooledConnection};
 
@@ -8,7 +8,7 @@ use diesel::{prelude::SqliteConnection as DbConnection, sqlite::Sqlite as Backen
 #[cfg(feature = "mysql")]
 use diesel::{mysql::Mysql as Backend, prelude::MysqlConnection as DbConnection};
 
-use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
+use diesel_migrations::{EmbeddedMigrations, MigrationHarness, embed_migrations};
 
 use crate::config::ConfDB;
 use crate::models::admin::DBStats;

@@ -1,6 +1,6 @@
 use anyhow::Result;
 use jsonwebtoken::{
-    decode, encode, get_current_timestamp, DecodingKey, EncodingKey, Header, Validation,
+    DecodingKey, EncodingKey, Header, Validation, decode, encode, get_current_timestamp,
 };
 use serde::{Deserialize, Serialize};
 

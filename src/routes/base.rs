@@ -1,5 +1,5 @@
 use anyhow::Result;
-use rocket::{get, http::Status, post, response::status::Custom, serde::json::Json, State};
+use rocket::{State, get, http::Status, post, response::status::Custom, serde::json::Json};
 
 use crate::{
     config::Conf,
@@ -12,7 +12,7 @@ use crate::{
 #[cfg(feature = "migrate-md5")]
 use crate::models::request::MD5_LEN;
 
-use super::{user_by_token, Response, ResponseData};
+use super::{Response, ResponseData, user_by_token};
 
 #[get("/<_..>")]
 pub fn fallback() -> Status {

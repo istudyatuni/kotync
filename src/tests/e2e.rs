@@ -2,7 +2,7 @@
 
 use anyhow::Result;
 use rocket::{
-    http::{hyper::header::AUTHORIZATION, uri::Origin, Header, Status},
+    http::{Header, Status, hyper::header::AUTHORIZATION, uri::Origin},
     uri,
 };
 
