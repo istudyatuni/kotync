@@ -16,7 +16,7 @@ You can configure everything via plain environment variables, `.env` or `config.
 | Port of MySQL database                       | `DATABASE_PORT`      | 3306                  | For MySQL                                   |
 | User for connecting to MySQL database        | `DATABASE_USER`      | -                     | For MySQL. Required                         |
 | Password for user in MySQL database          | `DATABASE_PASSWORD`  | -                     | For MySQL. Required                         |
-| Log level                                    | `RUST_LOG`           | `error`<sup>3</sup>   | Only plain environment variable (no `.env`) |
+| Log level                                    | `RUST_LOG`           | `error`<sup>3</sup>   |                                             |
 
 1. Enables some additiional features, like statistics. For `/admin` URL will look like `http://IP/admin/stats`
 1. Examples: 256 kB, 0.500 mib, 1MB, 1GiB

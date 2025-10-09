@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- RUST_LOG can now be set in `.env`
+
 ## v0.3.0-beta.1 (2025-09-28)
 
 ### Added

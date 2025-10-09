@@ -112,19 +112,7 @@ fn dotenv() -> Result<()> {
 }
 
 fn init_logger() -> Result<()> {
-    #[cfg(not(debug_assertions))]
-    const DEFAULT: LevelFilter = LevelFilter::Error;
-    #[cfg(debug_assertions)]
-    const DEFAULT: LevelFilter = LevelFilter::Info;
-
-    let level: LevelFilter = std::env::var("RUST_LOG")
-        .map(|s| {
-            LevelFilter::from_str(&s)
-                .inspect_err(|_| eprintln!("invalid RUST_LOG"))
-                .unwrap_or(DEFAULT)
-        })
-        .unwrap_or(DEFAULT);
-
+    let level = logger_level();
     eprintln!("Using log level {level}");
 
     TermLogger::init(
@@ -135,6 +123,39 @@ fn init_logger() -> Result<()> {
     )?;
 
     Ok(())
+}
+
+fn logger_level() -> LevelFilter {
+    #[cfg(not(debug_assertions))]
+    const DEFAULT: LevelFilter = LevelFilter::Error;
+    #[cfg(debug_assertions)]
+    const DEFAULT: LevelFilter = LevelFilter::Info;
+
+    let parse = |s: &str| {
+        LevelFilter::from_str(s)
+            .inspect_err(|_| eprintln!("unknown level RUST_LOG={s}"))
+            .ok()
+    };
+
+    // reading value with the same precedence, as others, first from env, then from file
+    //
+    // dotenvy preserve already existing variables
+    if let Ok(s) = std::env::var("RUST_LOG")
+        && let Some(level) = parse(&s)
+    {
+        return level;
+    }
+
+    let env_file = PathBuf::from(".env");
+    if env_file.exists()
+        && let Ok(envs) = std::fs::read_to_string(env_file)
+        && let Some(env) = envs.lines().find(|l| l.starts_with("RUST_LOG="))
+        && let Some(level) = parse(env.trim_start_matches("RUST_LOG=").trim())
+    {
+        return level;
+    };
+
+    DEFAULT
 }
 
 /// Current system time in milliseconds
