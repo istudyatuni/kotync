@@ -1,18 +1,23 @@
 use anyhow::Result;
 use serde::Deserialize;
+use zeroize::ZeroizeOnDrop;
 
 use super::db::User;
 
 #[cfg(feature = "migrate-md5")]
 pub const MD5_LEN: usize = 32;
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, ZeroizeOnDrop)]
 #[cfg_attr(test, derive(serde::Serialize))]
 pub struct Auth {
+    #[zeroize(skip)]
     pub email: String,
+
     pub password: String,
+
     #[cfg(feature = "migrate-md5")]
     #[serde(skip_deserializing)]
+    #[zeroize(skip)]
     pub password_md5: String,
 }
 

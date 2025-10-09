@@ -35,6 +35,7 @@ simplelog = "0.12.2"
 strum = { version = "0.27.2", features = ["derive"] }
 thiserror = "2.0.16"
 unicode-segmentation = "1.12.0"
+zeroize = { version = "1.8.2", features = ["derive"] }
 
 
 [dev-dependencies]
