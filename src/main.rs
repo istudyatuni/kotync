@@ -85,7 +85,8 @@ fn rocket(config: Conf, db: DB) -> Result<Rocket<Build>> {
                 routes::resource::save_history,
                 routes::resource::get_history,
             ],
-        );
+        )
+        .mount("/", routes![routes::base::fallback]);
 
     if let Some(admin) = &config.server.admin_api {
         if !admin.starts_with('/') {

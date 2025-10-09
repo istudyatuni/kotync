@@ -14,6 +14,11 @@ use crate::models::request::MD5_LEN;
 
 use super::{user_by_token, Response, ResponseData};
 
+#[get("/<_..>")]
+pub fn fallback() -> Status {
+    Status::NotFound
+}
+
 #[get("/")]
 pub fn root() -> &'static str {
     "Alive"
