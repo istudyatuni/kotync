@@ -26,6 +26,7 @@ pub fn auth(
     db: &State<DB>,
 ) -> Response<Json<response::Auth>, &'static str> {
     let req = req
+        .0
         .parse()
         .map_err(|e| ResponseData::StatusMessage(Custom(Status::BadRequest, e)))?;
 

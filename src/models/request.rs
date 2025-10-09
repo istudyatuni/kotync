@@ -28,7 +28,7 @@ impl Auth {
     }
 
     /// Validate fields and hash password
-    pub fn parse(&self) -> Result<Self, &'static str> {
+    pub fn parse(self) -> Result<Self, &'static str> {
         if !matches!(self.password.len(), 2..=24) {
             return Err("Password should be from 2 to 24 characters long");
         }
