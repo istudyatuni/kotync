@@ -21,7 +21,11 @@ jobs:
           toolchain: '1.86'
           components: clippy, rustfmt
       - uses: Swatinem/rust-cache@v2
-      - uses: extractions/setup-just@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+
+      - name: install tools
+        run: nix profile add "nixpkgs#just" && just -V
+
       - run: just ci
