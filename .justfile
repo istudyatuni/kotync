@@ -42,16 +42,16 @@ test-mysql: \
 test: test-new test-mysql
 
 # run clippy for all variants
-clippy: \
-	(cargo "clippy" "new") \
-	(cargo "clippy" "mysql") \
-	(cargo "clippy" "original")
+clippy *args: \
+	(cargo "clippy" "new" args) \
+	(cargo "clippy" "mysql" args) \
+	(cargo "clippy" "original" args)
 
 # run full checks
 check: clippy test
 
 # run checks in CI (no mysql)
-ci: && clippy test-new
+ci: && (clippy "-D" "warnings") test-new
 	cargo fmt --check
 
 format:
