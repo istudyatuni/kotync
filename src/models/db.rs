@@ -7,8 +7,6 @@ use diesel::sqlite::Sqlite as Backend;
 use diesel::mysql::Mysql as Backend;
 use log::error;
 
-use crate::models::{BoolToInt, common::ContentRating};
-
 use super::common::{
     Category as ApiCategory, Favourite as ApiFavourite, History as ApiHistory, Manga as ApiManga,
     MangaTag as ApiMangaTag, Time, UserID,

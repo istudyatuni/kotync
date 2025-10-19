@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use strum::EnumString;
 
 use super::{
-    IntToBool, TruncatedString,
+    TruncatedString,
     db::{
         Category as DBCategory, Favourite as DBFavourite, History as DBHistory, Manga as DBManga,
         Tag as DBTag,
