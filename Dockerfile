@@ -3,7 +3,7 @@ ARG kind=new
 
 # ----- build ----- #
 
-FROM rust:1.86-alpine AS builder
+FROM rust:1.88-alpine AS builder
 
 # install even unnecessary deps for better caching
 RUN apk add --no-cache musl-dev sqlite-static mariadb-dev
