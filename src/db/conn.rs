@@ -112,7 +112,7 @@ impl DB {
         Ok(())
     }
     pub fn add_favourites_package(&self, pkg: &FavouritesPackage, user_id: UserID) -> Result<()> {
-        log::info!("adding favourites_package for user {}", user_id);
+        log::info!("adding favourites_package for user {user_id}");
 
         let conn = &mut self.pool()?;
 
