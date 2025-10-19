@@ -154,9 +154,6 @@ pub struct Manga {
     pub url: String,
     pub public_url: String,
     pub rating: f32,
-    // for compatibility
-    #[serde(rename = "nsfw")]
-    pub is_nsfw: Option<i32>,
     pub content_rating: Option<ContentRating>,
     pub cover_url: String,
     pub large_cover_url: Option<String>,
@@ -175,16 +172,7 @@ impl Manga {
             url: self.url.truncated(255),
             public_url: self.public_url.truncated(255),
             rating: self.rating,
-            content_rating: self.content_rating.map(|r| r.to_string()).or_else(|| {
-                self.is_nsfw.map(|n| {
-                    if n.to_bool() {
-                        ContentRating::Adult
-                    } else {
-                        ContentRating::Safe
-                    }
-                    .to_string()
-                })
-            }),
+            content_rating: self.content_rating.map(|r| r.to_string()),
             cover_url: self.cover_url.truncated(255),
             large_cover_url: None, // ignored?
             state: self.state.map(|s| s.to_string()),

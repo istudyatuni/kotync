@@ -146,8 +146,6 @@ impl Manga {
             url: self.url.clone(),
             public_url: self.public_url.clone(),
             rating: self.rating,
-            is_nsfw: content_rating
-                .map(|r| matches!(r, ContentRating::Suggestive | ContentRating::Adult).to_i32()),
             content_rating,
             cover_url: self.cover_url.clone(),
             large_cover_url: self.large_cover_url.clone(),

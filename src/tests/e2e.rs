@@ -424,7 +424,6 @@ mod data {
             url: "kotatsu://test".to_string(),
             public_url: "http://example.com/test".to_string(),
             rating: 2.3,
-            is_nsfw: Some(1),
             content_rating: Some(ContentRating::Suggestive),
             cover_url: "http://example.com/cover".to_string(),
             large_cover_url: None,
